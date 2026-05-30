@@ -1,0 +1,51 @@
+# Core dependencies
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Database & Cache
+redis==5.0.1
+redis-om==0.2.2
+supabase==2.3.4
+
+# Job Queue
+bullmq==1.13.1
+ioredis==5.3.2
+
+# Monitoring
+prometheus-client==0.19.0
+pyyaml==6.0.1
+psutil==5.9.8
+
+# HTTP & Async
+httpx==0.25.2
+aiofiles==23.2.1
+aiohttp==3.9.1
+
+# Calendar Integrations
+google-api-python-client==2.100.0
+google-auth-httplib2==0.1.1
+google-auth-oauthlib==1.0.0
+icalendar==5.0.13
+pytz==2023.3.post1
+
+# Scheduler
+schedule==1.2.0
+apscheduler==3.10.4
+
+# WhatsApp
+twilio==8.11.0
+
+# Utilities
+python-dotenv==1.0.0
+python-multipart==0.0.6
+email-validator==2.1.0
+
+# Logging
+python-json-logger==2.0.7
+
+# Testing (optional)
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0

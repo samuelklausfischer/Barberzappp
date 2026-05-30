@@ -1,0 +1,694 @@
+# BarberZap Alerting Configuration
+# ================================
+# Configuration for alert thresholds, notification channels, and on-call rotation
+
+# Global Configuration
+global:
+  # Default evaluation interval
+  evaluation_interval_seconds: 30
+
+  # Default notification settings
+  notification_resend_seconds: 3600  # Resend after 1 hour
+
+  # Default severity levels
+  default_severity: warning
+
+# Alert Definitions
+alerts:
+  # Webhook-Related Alerts
+  - name: webhook_success_rate_low
+    display_name: Low Webhook Success Rate
+    description: Webhook success rate has dropped below threshold
+    metric:
+      name: barber_webhook_success_rate
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      critical:
+        value: 90
+        operator: "<"
+      warning:
+        value: 95
+        operator: "<"
+    annotations:
+      summary: "Webhook success rate is low for shop {{ $labels.shop_id }}"
+      description: "Current rate: {{ $value }}% (threshold: {{ $threshold }}%)"
+    channels: [slack, email]
+    cooldown_seconds: 300  # 5 minutes
+    enabled: true
+
+  - name: webhook_latency_high
+    display_name: High Webhook Latency
+    description: Webhook processing time is too high
+    metric:
+      name: barber_webhook_processing_seconds
+      type: histogram_quantile
+      quantile: 0.95
+      labels:
+        shop_id: "*"
+    thresholds:
+      critical:
+        value: 5
+        operator: ">"
+      warning:
+        value: 2
+        operator: ">"
+    annotations:
+      summary: "High webhook latency for shop {{ $labels.shop_id }}"
+      description: "95th percentile: {{ $value }}s (threshold: {{ $threshold }}s)"
+    channels: [slack]
+    cooldown_seconds: 600  # 10 minutes
+    enabled: true
+
+  # Cache-Related Alerts
+  - name: cache_hit_rate_low
+    display_name: Low Cache Hit Rate
+    description: Cache hit rate has dropped below threshold
+    metric:
+      name: barber_cache_hit_rate
+      type: gauge
+      labels:
+        shop_id: "*"
+        cache_type: "*"
+    thresholds:
+      critical:
+        value: 70
+        operator: "<"
+      warning:
+        value: 80
+        operator: "<"
+    annotations:
+      summary: "Low cache hit rate for {{ $labels.shop_id }} ({{ $labels.cache_type }})"
+      description: "Current rate: {{ $value }}% (threshold: {{ $threshold }}%)"
+    channels: [slack, email]
+    cooldown_seconds: 1800  # 30 minutes
+    enabled: true
+
+  # Booking-Related Alerts
+  - name: booking_conflicts_high
+    display_name: High Booking Conflicts
+    description: Too many booking conflicts per minute
+    metric:
+      name: barber_booking_conflicts_per_minute
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      critical:
+        value: 20
+        operator: ">"
+      warning:
+        value: 10
+        operator: ">"
+      info:
+        value: 5
+        operator: ">"
+    annotations:
+      summary: "High booking conflict rate for shop {{ $labels.shop_id }}"
+      description: "{{ $value }} conflicts/min (threshold: {{ $threshold }}/min)"
+    channels: [slack, whatsapp]
+    cooldown_seconds: 120  # 2 minutes
+    enabled: true
+
+  - name: booking_success_rate_low
+    display_name: Low Booking Success Rate
+    description: Booking success rate has dropped
+    metric:
+      name: barber_booking_success_rate
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      critical:
+        value: 90
+        operator: "<"
+      warning:
+        value: 95
+        operator: "<"
+    annotations:
+      summary: "Low booking success rate for shop {{ $labels.shop_id }}"
+      description: "{{ $value }}% success (threshold: {{ $threshold }}%)"
+    channels: [slack, email]
+    cooldown_seconds: 600
+    enabled: true
+
+  # Outbox-Related Alerts
+  - name: outbox_queue_depth_high
+    display_name: High Outbox Queue Depth
+    description: Outbox queue is growing too large
+    metric:
+      name: barber_outbox_queue_depth
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      critical:
+        value: 500
+        operator: ">"
+      warning:
+        value: 100
+        operator: ">"
+    annotations:
+      summary: "High outbox queue depth for shop {{ $labels.shop_id }}"
+      description: "{{ $value }} items in queue (threshold: {{ $threshold }})"
+    channels: [slack, pagerduty]
+    cooldown_seconds: 300
+    enabled: true
+
+  # Realtime-Related Alerts
+  - name: realtime_connections_high
+    display_name: Unusual Realtime Connections
+    description: Realtime connections spike detected
+    metric:
+      name: barber_realtime_connections
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      warning:
+        value: 500
+        operator: ">"
+      critical:
+        value: 1000
+        operator: ">"
+    annotations:
+      summary: "High number of realtime connections for shop {{ $labels.shop_id }}"
+      description: "{{ $value }} connections (threshold: {{ $threshold }})"
+    channels: [slack]
+    cooldown_seconds: 600
+    enabled: true
+
+  - name: realtime_message_latency_high
+    display_name: High Realtime Message Latency
+    description: Realtime message delivery is slow
+    metric:
+      name: barber_realtime_message_seconds
+      type: histogram_quantile
+      quantile: 0.95
+      labels:
+        shop_id: "*"
+    thresholds:
+      warning:
+        value: 0.5
+        operator: ">"
+      critical:
+        value: 1
+        operator: ">"
+    annotations:
+      summary: "High realtime message latency for shop {{ $labels.shop_id }}"
+      description: "95th percentile: {{ $value }}s (threshold: {{ $threshold }}s)"
+    channels: [slack]
+    cooldown_seconds: 300
+    enabled: true
+
+  # Job-Related Alerts
+  - name: job_failed_high
+    display_name: High Job Failure Rate
+    description: Too many jobs are failing
+    metric:
+      name: barber_job_failed
+      type: gauge
+      labels:
+        shop_id: "*"
+        queue: "*"
+    thresholds:
+      critical:
+        value: 50
+        operator: ">"
+      warning:
+        value: 20
+        operator: ">"
+    annotations:
+      summary: "High job failure rate for shop {{ $labels.shop_id }} ({{ $labels.queue }})"
+      description: "{{ $value }} failed jobs (threshold: {{ $threshold }})"
+    channels: [slack, email, pagerduty]
+    cooldown_seconds: 180
+    enabled: true
+
+  - name: job_processing_slow
+    display_name: Slow Job Processing
+    description: Jobs are taking too long to process
+    metric:
+      name: barber_job_processing_seconds
+      type: histogram_quantile
+      quantile: 0.95
+      labels:
+        shop_id: "*"
+        queue: "*"
+        job_type: "*"
+    thresholds:
+      warning:
+        value: 60
+        operator: ">"
+      critical:
+        value: 300
+        operator: ">"
+    annotations:
+      summary: "Slow job processing for shop {{ $labels.shop_id }} ({{ $labels.queue }}/{{ $labels.job_type }})"
+      description: "95th percentile: {{ $value }}s (threshold: {{ $threshold }}s)"
+    channels: [slack, email]
+    cooldown_seconds: 600
+    enabled: true
+
+  # System Health Alerts
+  - name: redis_unhealthy
+    display_name: Redis Unhealthy
+    description: Redis is not responding properly
+    metric:
+      name: barber_redis_health
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      critical:
+        value: 1
+        operator: "<"
+    annotations:
+      summary: "Redis is unhealthy for shop {{ $labels.shop_id }}"
+      description: "Redis health check failed"
+    channels: [slack, pagerduty, whatsapp]
+    cooldown_seconds: 60
+    enabled: true
+
+  - name: redis_latency_high
+    display_name: High Redis Latency
+    description: Redis response time is too high
+    metric:
+      name: barber_redis_ping_seconds
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      warning:
+        value: 0.1
+        operator: ">"
+      critical:
+        value: 0.5
+        operator: ">"
+    annotations:
+      summary: "High Redis latency for shop {{ $labels.shop_id }}"
+      description: "{{ $value }}s ping time (threshold: {{ $threshold }}s)"
+    channels: [slack]
+    cooldown_seconds: 300
+    enabled: true
+
+  - name: supabase_unhealthy
+    display_name: Supabase Unhealthy
+    description: Supabase is not responding properly
+    metric:
+      name: barber_supabase_health
+      type: gauge
+      labels:
+        shop_id: "*"
+    thresholds:
+      critical:
+        value: 1
+        operator: "<"
+    annotations:
+      summary: "Supabase is unhealthy for shop {{ $labels.shop_id }}"
+      description: "Supabase health check failed"
+    channels: [slack, pagerduty, whatsapp]
+    cooldown_seconds: 60
+    enabled: true
+
+  - name: supabase_query_slow
+    display_name: Slow Supabase Queries
+    description: Supabase queries are running slow
+    metric:
+      name: barber_supabase_query_seconds
+      type: gauge
+      labels:
+        shop_id: "*"
+        query_type: "*"
+    thresholds:
+      warning:
+        value: 0.5
+        operator: ">"
+      critical:
+        value: 2
+        operator: ">"
+    annotations:
+      summary: "Slow Supabase queries for shop {{ $labels.shop_id }} ({{ $labels.query_type }})"
+      description: "{{ $value }}s query time (threshold: {{ $threshold }}s)"
+    channels: [slack, email]
+    cooldown_seconds: 600
+    enabled: true
+
+  # Error-Related Alerts
+  - name: error_rate_high
+    display_name: High Error Rate
+    description: Application error rate is too high
+    metric:
+      name: barber_errors_per_minute
+      type: gauge
+      labels:
+        shop_id: "*"
+        error_type: "*"
+        severity: "critical"
+    thresholds:
+      critical:
+        value: 10
+        operator: ">"
+      warning:
+        value: 5
+        operator: ">"
+      info:
+        value: 1
+        operator: ">"
+    annotations:
+      summary: "High error rate for shop {{ $labels.shop_id }} ({{ $labels.error_type }})"
+      description: "{{ $value }} errors/min (threshold: {{ $threshold }}/min)"
+    channels: [slack, email, pagerduty]
+    cooldown_seconds: 120
+    enabled: true
+
+  # Performance Alerts
+  - name: api_latency_high
+    display_name: High API Latency
+    description: API response times are slow
+    metric:
+      name: barber_api_request_seconds
+      type: histogram_quantile
+      quantile: 0.95
+      labels:
+        shop_id: "*"
+        endpoint: "*"
+    thresholds:
+      critical:
+        value: 2
+        operator: ">"
+      warning:
+        value: 1
+        operator: ">"
+    annotations:
+      summary: "High API latency for shop {{ $labels.shop_id }} ({{ $labels.endpoint }})"
+      description: "95th percentile: {{ $value }}s (threshold: {{ $threshold }}s)"
+    channels: [slack]
+    cooldown_seconds: 600
+    enabled: true
+
+  - name: dashboard_load_slow
+    display_name: Slow Dashboard Load
+    description: Dashboard load time is too slow
+    metric:
+      name: barber_dashboard_load_seconds
+      type: histogram_quantile
+      quantile: 0.95
+      labels:
+        shop_id: "*"
+        dashboard_type: "*"
+    thresholds:
+      critical:
+        value: 3
+        operator: ">"
+      warning:
+        value: 1
+        operator: ">"
+    annotations:
+      summary: "Slow dashboard load for shop {{ $labels.shop_id }} ({{ $labels.dashboard_type }})"
+      description: "95th percentile: {{ $value }}s (threshold: {{ $threshold }}s)"
+    channels: [slack]
+    cooldown_seconds: 600
+    enabled: true
+
+  # System Resource Alerts
+  - name: cpu_usage_high
+    display_name: High CPU Usage
+    description: System CPU usage is high
+    metric:
+      name: barber_system_cpu_percent
+      type: gauge
+    thresholds:
+      warning:
+        value: 70
+        operator: ">"
+      critical:
+        value: 90
+        operator: ">"
+    annotations:
+      summary: "High CPU usage"
+      description: "{{ $value }}% CPU (threshold: {{ $threshold }}%)"
+    channels: [slack]
+    cooldown_seconds: 600
+    enabled: true
+
+  - name: memory_usage_high
+    display_name: High Memory Usage
+    description: System memory usage is high
+    metric:
+      name: barber_system_memory_percent
+      type: gauge
+    thresholds:
+      warning:
+        value: 75
+        operator: ">"
+      critical:
+        value: 90
+        operator: ">"
+    annotations:
+      summary: "High memory usage"
+      description: "{{ $value }}% memory used (threshold: {{ $threshold }}%)"
+    channels: [slack, email]
+    cooldown_seconds: 600
+    enabled: true
+
+  - name: disk_usage_high
+    display_name: High Disk Usage
+    description: System disk usage is high
+    metric:
+      name: barber_system_disk_percent
+      type: gauge
+    thresholds:
+      warning:
+        value: 80
+        operator: ">"
+      critical:
+        value: 90
+        operator: ">"
+    annotations:
+      summary: "High disk usage"
+      description: "{{ $value }}% disk used (threshold: {{ $threshold }}%)"
+    channels: [slack, email]
+    cooldown_seconds: 3600  # 1 hour
+    enabled: true
+
+# Notification Channels Configuration
+channels:
+  slack:
+    enabled: true
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#barberzap-alerts"
+    username: "BarberZap Bot"
+    icon_emoji: ":barber:"
+    severity_labels:
+      critical: "<!channel>"  # @channel for critical
+      warning: "<!here>"
+      info: ""
+    message_template: |
+      *{{ .Severity | ToUpper }} Alert: {{ .AlertName }}*
+      {{ .Summary }}
+      
+      {{ .Description }}
+      
+      Labels: {{ range $key, $value := .Labels }}{{ $key }}={{ $value }} {{ end }}
+      Starts: {{ .StartsAt }}
+    max_failures: 3
+    retry_interval_seconds: 60
+
+  email:
+    enabled: true
+    smtp_server: "${SMTP_SERVER}"
+    smtp_port: 587
+    smtp_username: "${SMTP_USERNAME}"
+    smtp_password: "${SMTP_PASSWORD}"
+    from_address: "alerts@barberzap.com"
+    to_addresses:
+      critical: ["oncall@barberzap.com"]
+      warning: ["devops@barberzap.com"]
+      info: ["devops@barberzap.com"]
+    subject_template: "[{{ .Severity | ToUpper }}] {{ .AlertName }}"
+    message_template: |
+      Alert: {{ .AlertName }}
+      Severity: {{ .Severity | ToUpper }}
+      
+      {{ .Summary }}
+      
+      {{ .Description }}
+      
+      Starts: {{ .StartsAt }}
+      
+      View dashboard: https://barberzap.com/monitoring
+    max_failures: 3
+    retry_interval_seconds: 300  # 5 minutes
+
+  whatsapp:
+    enabled: true
+    api_endpoint: "${WHATSAPP_API_URL}"
+    api_token: "${WHATSAPP_API_TOKEN}"
+    phone_numbers:
+      critical: ["+5511999999999"]  # On-call numbers
+      warning: ["+5511999999999"]
+      info: []
+    message_template: |
+      *{{ .Severity | ToUpper }}* {{ .AlertName }}
+      
+      {{ .Summary }}
+      
+      {{ .Description }}
+    max_failures: 3
+    retry_interval_seconds: 60
+
+  pagerduty:
+    enabled: false  # Enable if you have PagerDuty account
+    api_key: "${PAGERDUTY_API_KEY}"
+    service_key: "${PAGERDUTY_SERVICE_KEY}"
+    severity_mapping:
+      critical: "critical"
+      warning: "warning"
+      info: "info"
+    dedup_key_template: "{{ .AlertName }}-{{ .Labels.shop_id }}"
+    max_failures: 5
+    retry_interval_seconds: 300
+
+# On-Call Rotation Configuration
+on_call:
+  enabled: true
+  
+  # Rotation schedule
+  schedules:
+    - name: primary
+      rotation: "weekly"  # daily, weekly, monthly
+      start_time: "2024-01-01T09:00:00Z"
+      timezone: "America/Sao_Paulo"
+      members:
+        - name: "Alice"
+          phone: "+5511999999999"
+          email: "alice@barberzap.com"
+          slack_id: "U12345678"
+        - name: "Bob"
+          phone: "+5511999999998"
+          email: "bob@barberzap.com"
+          slack_id: "U87654321"
+        - name: "Charlie"
+          phone: "+5511999999997"
+          email: "charlie@barberzap.com"
+          slack_id: "U55555555"
+    
+    - name: secondary
+      rotation: "weekly"
+      start_time: "2024-01-01T09:00:00Z"
+      timezone: "America/Sao_Paulo"
+      members:
+        - name: "David"
+          phone: "+5511999999996"
+          email: "david@barberzap.com"
+          slack_id: "U66666666"
+        - name: "Eve"
+          phone: "+5511999999995"
+          email: "eve@barberzap.com"
+          slack_id: "U77777777"
+
+  # Override rules (holidays, vacations)
+  overrides:
+    - name: "Alice Vacation"
+      start: "2024-07-01T00:00:00Z"
+      end: "2024-07-15T00:00:00Z"
+      assign_to: "Bob"
+
+  # Escalation rules
+  escalation:
+    - severity: critical
+      levels:
+        - wait_minutes: 5
+          notify: [primary]
+        - wait_minutes: 15
+          notify: [primary, secondary]
+        - wait_minutes: 30
+          notify: [primary, secondary, manager]
+    
+    - severity: warning
+      levels:
+        - wait_minutes: 30
+          notify: [primary]
+        - wait_minutes: 60
+          notify: [primary, secondary]
+
+  # Managers (for critical escalation)
+  managers:
+    - name: "Manager"
+      phone: "+5511999999994"
+      email: "manager@barberzap.com"
+      slack_id: "U88888888"
+
+# Alert Grouping and Deduplication
+grouping:
+  # Group alerts by these rules to avoid notification spam
+  rules:
+    - group_by: [shop_id, alertname]
+      wait: 30
+      interval: 300
+      repeat_interval: 3600
+    
+    - group_by: [alertname]
+      wait: 60
+      interval: 600
+      repeat_interval: 7200
+  
+  # Deduplicate alerts
+  dedup:
+    enabled: true
+    time_window_seconds: 300  # Consider alerts within 5 min as duplicates
+
+# Maintenance Windows (silence alerts during planned maintenance)
+maintenance_windows:
+  - name: "Weekly Deployment"
+    schedule: "0 3 * * 0"  # Every Sunday at 3 AM
+    duration_hours: 2
+    affected_alerts: ["*"]
+    description: "Weekly deployment window"
+
+  - name: "Database Backup"
+    schedule: "0 2 * * *"  # Every day at 2 AM
+    duration_hours: 1
+    affected_alerts: ["*_latency_high", "*_slow"]
+    description: "Database backup window"
+
+  - name: "Emergency Override"
+    enabled: false
+    start_time: "2024-01-01T00:00:00Z"
+    end_time: "2024-01-01T12:00:00Z"
+    affected_alerts: ["*"]
+    description: "Emergency maintenance override"
+    created_by: "devops"
+    reason: "System upgrade"
+
+# Alert History Retention
+retention:
+  alerts_days: 30
+  notifications_days: 90
+  metrics_days: 30
+
+# Advanced Settings
+advanced:
+  # Alert evaluation settings
+  evaluation:
+    max_concurrent_evaluations: 10
+    evaluation_timeout_seconds: 30
+  
+  # Notification settings
+  notifications:
+    max_concurrent_sends: 5
+    send_timeout_seconds: 30
+    batch_interval_seconds: 5
+  
+  # Performance settings
+  cache:
+    metrics_cache_size: 10000
+    alert_state_cache_size: 5000
+  
+  # Logging
+  logging:
+    level: info
+    format: json
+    output: stdout

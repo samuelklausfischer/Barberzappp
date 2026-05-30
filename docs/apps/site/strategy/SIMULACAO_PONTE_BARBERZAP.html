@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação: Ponte de Conversão Barberzap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-glow { transition: all 0.3s ease; box-shadow: 0 0 0 rgba(59, 130, 246, 0); }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+        .modal-enter { animation: modalFadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .step-inactive { opacity: 0.3; filter: grayscale(1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Interface de Simulação -->
+    <div class="max-w-4xl w-full">
+        
+        <!-- Status do Fluxo -->
+        <div class="flex justify-between mb-8 px-4">
+            <div id="status-1" class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">1</div>
+                <span class="text-xs font-bold uppercase tracking-widest text-blue-500">Landing Page</span>
+            </div>
+            <div id="status-2" class="flex items-center gap-2 step-inactive transition-all duration-500">
+                <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs font-bold">2</div>
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Captura de Lead</span>
+            </div>
+            <div id="status-3" class="flex items-center gap-2 step-inactive transition-all duration-500">
+                <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs font-bold">3</div>
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Checkout Seguro</span>
+            </div>
+        </div>
+
+        <!-- Tela 1: Simulação da Landing Page -->
+        <div id="screen-lp" class="glass rounded-[40px] p-12 text-center border-blue-500/20 border-2">
+            <span class="bg-blue-600/10 text-blue-500 text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest mb-6 inline-block">Sua Barbearia no Próximo Nível</span>
+            <h2 class="text-4xl md:text-5xl font-800 mb-6 leading-tight">Agendamento Automático <br><span class="text-blue-500">via WhatsApp</span></h2>
+            <p class="text-gray-400 mb-10 max-w-lg mx-auto">Pare de perder tempo agendando horários manualmente. Deixe nossa IA trabalhar para você 24h por dia.</p>
+            
+            <button onclick="openCapture()" class="btn-glow bg-blue-600 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 mx-auto">
+                Quero Profissionalizar Agora <i class="fas fa-arrow-right"></i>
+            </button>
+            <p class="mt-6 text-gray-600 text-[10px] uppercase tracking-widest"><i class="fas fa-shield-alt mr-2"></i> Teste grátis por 7 dias</p>
+        </div>
+
+        <!-- Tela 2: A Ponte (Modal de Captura) - Inicialmente Escondida -->
+        <div id="screen-capture" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div class="modal-enter glass max-w-md w-full rounded-[32px] p-10 border-t-4 border-blue-500 shadow-2xl relative">
+                <button onclick="closeCapture()" class="absolute top-6 right-6 text-gray-500 hover:text-white transition"><i class="fas fa-times"></i></button>
+                
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-blue-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-500 text-2xl">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="text-2xl font-800 mb-2">Quase lá! 🚀</h3>
+                    <p class="text-gray-400 text-sm">Preencha os dados abaixo para vincular sua barbearia ao sistema.</p>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-gray-500 mb-2 block tracking-widest">Nome da Barbearia</label>
+                        <input id="input-name" type="text" placeholder="Ex: Barbearia do João" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm focus:border-blue-500 outline-none transition" />
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-gray-500 mb-2 block tracking-widest">Seu WhatsApp</label>
+                        <input id="input-phone" type="tel" placeholder="(11) 99999-9999" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm focus:border-blue-500 outline-none transition" />
+                    </div>
+                    
+                    <button onclick="goToCheckout()" class="btn-glow w-full bg-emerald-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3">
+                        Liberar Meu Acesso <i class="fas fa-check-circle"></i>
+                    </button>
+                </div>
+
+                <div class="mt-8 flex items-center justify-center gap-4 text-[9px] text-gray-500 uppercase tracking-widest">
+                    <span class="flex items-center gap-1"><i class="fas fa-lock text-emerald-500"></i> Dados Seguros</span>
+                    <span class="flex items-center gap-1"><i class="fas fa-bolt text-blue-500"></i> Instalação Instantânea</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela 3: Sucesso / Redirecionamento -->
+        <div id="screen-success" class="hidden glass rounded-[40px] p-20 text-center border-emerald-500/20 border-2">
+            <div class="w-20 h-20 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 text-white text-4xl shadow-xl shadow-emerald-600/20">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="text-3xl font-800 mb-4 tracking-tight text-emerald-500">Lead Capturado com Sucesso!</h2>
+            <p class="text-gray-400 mb-8 max-w-sm mx-auto text-sm leading-relaxed">Neste momento, os dados foram enviados para o seu <strong>n8n/Banco de Dados</strong> e o cliente está sendo redirecionado para o Cakto.</p>
+            
+            <div class="bg-white/5 p-4 rounded-xl inline-block border border-white/10">
+                <p class="text-xs text-gray-500 uppercase mb-2">Redirecionando para Cakto em...</p>
+                <div class="text-2xl font-black text-blue-500" id="countdown">3s</div>
+            </div>
+
+            <div class="mt-12 p-6 bg-emerald-900/10 border border-emerald-800/30 rounded-2xl text-left max-w-md mx-auto">
+                <p class="text-xs font-bold text-emerald-500 uppercase mb-2">Vantagem desta etapa:</p>
+                <p class="text-[11px] text-gray-400 italic">"Se ele fechar a aba agora, você já tem o WhatsApp dele para fazer o remarketing manual e recuperar a venda de R$ 49,90."</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function openCapture() {
+            document.getElementById('screen-capture').classList.remove('hidden');
+            document.getElementById('status-2').classList.remove('step-inactive');
+            document.getElementById('status-2').querySelector('div').classList.replace('bg-gray-800', 'bg-blue-600');
+            document.getElementById('status-2').querySelector('span').classList.replace('text-gray-500', 'text-blue-500');
+        }
+
+        function closeCapture() {
+            document.getElementById('screen-capture').classList.add('hidden');
+        }
+
+        function goToCheckout() {
+            const name = document.getElementById('input-name').value;
+            const phone = document.getElementById('input-phone').value;
+
+            if(!name || !phone) {
+                alert("Por favor, preencha os dados para continuar.");
+                return;
+            }
+
+            // Simula o envio
+            document.getElementById('screen-capture').classList.add('hidden');
+            document.getElementById('screen-lp').classList.add('hidden');
+            document.getElementById('screen-success').classList.remove('hidden');
+            
+            document.getElementById('status-3').classList.remove('step-inactive');
+            document.getElementById('status-3').querySelector('div').classList.replace('bg-gray-800', 'bg-emerald-600');
+            document.getElementById('status-3').querySelector('span').classList.replace('text-gray-500', 'text-emerald-500');
+
+            let count = 3;
+            const timer = setInterval(() => {
+                count--;
+                document.getElementById('countdown').innerText = count + "s";
+                if(count <= 0) {
+                    clearInterval(timer);
+                    alert("Simulação Concluída: Aqui o usuário seria enviado para o link do Cakto com o preço corrigido.");
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

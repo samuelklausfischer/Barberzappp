@@ -1,0 +1,247 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║                   BULLMQ ARCHITECTURE - BARBERZAP                         ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          TRIGGERS                                        │
+│                                                                         │
+│  ┌───────────────┐    ┌───────────────┐    ┌───────────────┐         │
+│  │  Webhook:     │    │  Supabase:    │    │  Scheduler:   │         │
+│  │  Appointment  │    │  Database     │    │  Cron Jobs    │         │
+│  │  Created      │    │  Triggers     │    │  (hourly)     │         │
+│  └───────┬───────┘    └───────┬───────┘    └───────┬───────┘         │
+└──────────┼──────────────────┼──────────────────┼─────────────────────┘
+           │                  │                  │
+           ▼                  ▼                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       BULLMQ QUEUES                                     │
+│                                                                         │
+│  ┌──────────────────────────────┐  ┌──────────────────────────────┐   │
+│  │     NOTIFICATIONS QUEUE      │  │        CRM QUEUE             │   │
+│  │                              │  │                              │   │
+│  │  • send_booking_confirmation │  │  • update_client_stats       │   │
+│  │  • send_reminder_24h         │  │                              │   │
+│  │  • send_reminder_2h          │  │                              │   │
+│  │  • send_cancellation_notify  │  │                              │   │
+│  │                              │  │                              │   │
+│  │  Priority: Critical/High     │  │  Priority: Low               │   │
+│  │  Workers: 5                  │  │  Workers: 3                  │   │
+│  └──────────────┬───────────────┘  └──────────────┬───────────────┘   │
+└─────────────────┼─────────────────────────────────┼───────────────────┘
+                  │                                 │
+                  ▼                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         REDIS STORAGE                                   │
+│                                                                         │
+│  ┌──────────────────────────────┐  ┌──────────────────────────────┐   │
+│  │        JOB STORAGE           │  │      DEAD LETTER QUEUE       │   │
+│  │                              │  │                              │   │
+│  │  ┌────────────────────────┐  │  │  ┌────────────────────────┐  │   │
+│  │  │ Waiting: ⏳             │  │  │  │ Failed Jobs: ❌       │  │   │
+│  │  │ Active:  ▶️              │  │  │  │ • Inspect            │  │   │
+│  │  │ Completed: ✅            │  │  │  │ • Retry              │  │   │
+│  │  │ Failed:   ❌             │  │  │  │ • Debug              │  │   │
+│  │  │ Delayed:  ⏱️             │  │  │  │ • Analyze            │  │   │
+│  │  └────────────────────────┘  │  │  └────────────────────────┘  │   │
+│  │                              │  │                              │   │
+│  │  Retry Logic:                │  │  TTL: 7 days                 │   │
+│  │  • 3 attempts                │  │                              │   │
+│  │  • Exponential backoff       │  │                              │   │
+│  └──────────────────────────────┘  └──────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+                  │                                 │
+                  ▼                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          WORKERS                                        │
+│                                                                         │
+│  ┌──────────────────────────────┐  ┌──────────────────────────────┐   │
+│  │   NOTIFICATION WORKER        │  │       CRM WORKER             │   │
+│  │                              │  │                              │   │
+│  │  ┌────────────────────────┐  │  │  ┌────────────────────────┐  │   │
+│  │  │ send_booking_confirm   │──┼──┼──►│ update_client_stats   │  │   │
+│  │  └────────────────────────┘  │  │  └────────────────────────┘  │   │
+│  │  ┌────────────────────────┐  │  │                              │   │
+│  │  │ send_reminder_24h      │──┼──┴──► Process:                 │   │
+│  │  └────────────────────────┘  │      • total_visits           │   │
+│  │  ┌────────────────────────┐  │      • total_spent           │   │
+│  │  │ send_reminder_2h       │──┼──►    • loyalty_points        │   │
+│  │  └────────────────────────┘  │      • no_show_count         │   │
+│  │  ┌────────────────────────┐  │                              │   │
+│  │  │ send_cancel_notify     │──┼──►                            │   │
+│  │  └────────────────────────┘  │                              │   │
+│  │                              │                              │   │
+│  │  ┌────────────────────────┐  │  ┌────────────────────────┐  │   │
+│  │  │ WhatsApp Client        │──┼──┼──► Supabase Database    │  │   │
+│  │  • Send messages          │  │  │ • Update client stats   │  │   │
+│  │  • Interactive buttons    │  │  │ • Record history         │  │   │
+│  │  • Templates              │  │  │ • Generate reports       │   │
+│  │  • Error handling         │  │  │                          │   │
+│  │  └────────────────────────┘  │  └────────────────────────┘  │   │
+│  │                              │                              │   │
+│  └──────────────────────────────┘  └──────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         OUTPUTS                                         │
+│                                                                         │
+│  ┌────────────────┐      ┌────────────────┐      ┌────────────────┐   │
+│  │ WhatsApp to:   │      │ CRM Updates:   │      │ Logs:          │   │
+│  │                │      │                │      │                │   │
+│  │ • Client       │      │ • Stats        │      │ • Job status   │   │
+│  │ • Barber       │      │ • History      │      │ • Errors       │   │
+│  │ • Confirms     │      │ • Loyalty      │      │ • Metrics      │   │
+│  │ • Reminders    │      │ • Reports      │      │ • Performance  │   │
+│  └────────────────┘      └────────────────┘      └────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                              WORKFLOW                                     ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+APPOINTMENT CREATED
+    │
+    ├─► 1. scheduleBookingConfirmation()
+    │       └─► Send WhatsApp with interactive buttons
+    │
+    ├─► 2. scheduleReminders()
+    │       ├─► send_reminder_24h (delay ~23h)
+    │       └─► send_reminder_2h (delay ~1h55m)
+    │
+    └─► 3. scheduleCRMUpdate('created')
+            └─► Update loyalty_points
+
+
+APPOINTMENT COMPLETED
+    │
+    └─► scheduleCRMUpdate('completed')
+            ├─► total_visits++
+            ├─► total_spent += price
+            ├─► last_visit_at = now
+            └─► loyalty_points += (price / 10)
+
+
+APPOINTMENT CANCELLED
+    │
+    ├─► 1. cancelReminderJobs()
+    │       └─► Remove pending reminders
+    │
+    ├─► 2. scheduleCRMUpdate('cancelled')
+    │       └─► cancelled_count++
+    │       └─► loyalty_points -= 2
+    │
+    └─► 3. scheduleCancellationNotification()
+            ├─► WhatsApp to client (with available slots)
+            └─► WhatsApp to barber (slot freed)
+
+
+CLIENT NO-SHOW
+    │
+    └─► scheduleCRMUpdate('no_show')
+            ├─► no_show_count++
+            └─► loyalty_points -= 5
+
+
+CLIENT RESPONSE (WhatsApp)
+    │
+    ├─► CONFIRM appointment
+    │       └─► Update appointment.status = 'confirmed'
+    │
+    ├─► CANCEL appointment
+    │       └─► Trigger cancellation workflow
+    │
+    └─► RESCHEDULE
+            ├─► Select available slot
+            └─► Create new appointment
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          JOB PRIORITIES                                  ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+CRITICAL (1):    send_booking_confirmation
+                 send_cancellation_notification
+                 ────────────────────────────────
+                 Processed immediately
+                 
+HIGH (5):        send_reminder_24h
+                 ────────────────────────
+                 Important but can wait
+                 
+NORMAL (10):     send_reminder_2h
+                 ────────────────────────
+                 Standard priority
+                 
+LOW (20):        update_client_stats
+                 ────────────────────────
+                 Can be delayed/retried
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          MONITORING                                      ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+CLI Commands:
+  npm run stats           - Show queue statistics
+  npm run health          - Check system health
+  npm run queue <name>    - Detailed queue report
+  npm run job <q> <id>    - Job details
+  npm run retry <q> <id>  - Retry failed job
+  npm run list <q> <st>   - List jobs by status
+  npm run clean <q>       - Clean old jobs
+  npm run clean-dlq <q>   - Clean dead letter queue
+
+
+Health Checks:
+  ✓ Redis connection
+  ✓ Worker processes
+  ✓ Queue depth
+  ✓ Failed job rate
+  ✓ Average processing time
+
+
+Alerts:
+  ✗ Failed jobs > threshold
+  ✗ Queue depth > limit
+  ✗ Redis connection lost
+  ✗ Worker stopped
+  ✗ Processing time > limit
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    DEPLOYMENT RECOMMENDATIONS                            ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+Development:
+  • Single Redis instance
+  • Workers in same process as app
+  • Verbose logging enabled
+  • Job cleanup: 1 day (completed), 7 days (failed)
+
+
+Staging:
+  • Dedicated Redis (hosted)
+  • Separate worker processes
+  • Basic monitoring
+  • Job cleanup: 7 days (completed), 30 days (failed)
+
+
+Production:
+  • Redis Cluster (high availability)
+  • Multiple worker instances (load balanced)
+  • Professional monitoring (Prometheus/Grafana)
+  • Alerts configured
+  • Job cleanup: 30 days (completed), 90 days (failed)
+  • Redis persistence (RDB + AOF)
+  • SSL/TLS for Redis connections
+  • Separate environments (dev/stage/prod)
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║                    🚀 READY FOR DEPLOYMENT 🚀                            ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝

@@ -1,0 +1,54 @@
+{
+  "projectName": "BarberZap",
+  "namespace": "barberzap",
+  "roles": [
+    {
+      "id": "project-auditor",
+      "name": "Project Auditor",
+      "description": "Faz inventário do monorepo, identifica redundâncias, dívidas técnicas e prioridades objetivas.",
+      "system_prompt": "Audite o monorepo /root/barberzap-monorepo com foco em: (1) inventário por app (site vs saas), (2) duplicidades e arquivos órfãos, (3) riscos (security, envs, secrets), (4) gaps entre docs e código, (5) lista priorizada de ações com impacto/risco/esforço. Entregue um relatório em Markdown com seções curtas e paths. Não reescreva o que já existe — referencie docs/living quando possível.",
+      "capabilities": ["Repo inventory", "Redundancy detection", "Risk assessment", "Prioritized action plan"],
+      "metadata": {"priority": "critical", "estimated_effort": "2-4h", "dependencies": []}
+    },
+    {
+      "id": "docs-curator",
+      "name": "Docs Curator",
+      "description": "Organiza documentação de forma profissional (índices, taxonomia, living docs enxutos) seguindo CHANGE_POLICY.",
+      "system_prompt": "Organize a documentação do monorepo (/root/barberzap-monorepo). Objetivo: estrutura profissional e lógica, com docs fáceis de navegar e low-token. Siga docs/living/CHANGE_POLICY.md. Proponha uma taxonomia e mova/agrupa docs apenas com plano claro (não deletar). Produza: (1) proposta de árvore docs/, (2) lista de moves sugeridos (origem→destino), (3) melhorias em INDEX.md e docs/INDEX.md.",
+      "capabilities": ["Information architecture", "Doc indexing", "Token-efficient summarization"],
+      "metadata": {"priority": "high", "estimated_effort": "2-4h", "dependencies": []}
+    },
+    {
+      "id": "architecture-integrator",
+      "name": "Architecture Integrator",
+      "description": "Consolida arquitetura entre apps/site e apps/saas e define interfaces (auth, tenant, integrations).",
+      "system_prompt": "Analise arquitetura atual do BarberZap (apps/site e apps/saas) e proponha uma arquitetura consolidada com interfaces claras: auth model, multi-tenant, integrações (Supabase, Evolution API, n8n, Cakto), fluxos principais e ownership por componente. Entregue: (1) atualização sugerida para docs/living/ARCHITECTURE.md, (2) uma lista de decisões a registrar em DECISIONS.md.",
+      "capabilities": ["System design", "Interface definition", "Multi-tenant patterns"],
+      "metadata": {"priority": "high", "estimated_effort": "2-6h", "dependencies": ["project-auditor"]}
+    },
+    {
+      "id": "devops-runbook",
+      "name": "DevOps & Runbook Specialist",
+      "description": "Padroniza como rodar/build/deploy e consolida env vars/ports/commands.",
+      "system_prompt": "Levante como rodar cada app (site e saas), quais env vars existem (nomes apenas), portas, docker/deploy scripts, e gere recomendações objetivas para RUNBOOK.md. Entregue: (1) patch sugerido para docs/living/RUNBOOK.md, (2) lista de inconsistências (docs vs package.json vs scripts).",
+      "capabilities": ["Dev/build/deploy auditing", "Env var inventory", "Runbook writing"],
+      "metadata": {"priority": "high", "estimated_effort": "2-4h", "dependencies": []}
+    },
+    {
+      "id": "qa-checklist-author",
+      "name": "QA Checklist Author",
+      "description": "Cria um checklist profissional de QA/regressão por app e gates para merge.",
+      "system_prompt": "Crie um QA checklist profissional para o monorepo BarberZap: (1) smoke tests por app, (2) checks de lint/build, (3) e2e mínimo, (4) checklist de release. Use formato de checklist curto. Entregue um arquivo sugerido docs/qa/QA_CHECKLIST.md (conteúdo) e onde ele deve viver.",
+      "capabilities": ["QA strategy", "Release gates", "Checklist design"],
+      "metadata": {"priority": "medium", "estimated_effort": "1-2h", "dependencies": []}
+    },
+    {
+      "id": "subagent-orchestrator",
+      "name": "Sub-agent Orchestrator",
+      "description": "Define times, fases e handoff contracts para executar melhorias em paralelo.",
+      "system_prompt": "Com base nos relatórios dos outros sub-agentes, crie um plano de execução em fases (0-3) com paralelização, dependências, e handoff contracts. Entregue um roadmap curto (1-2 páginas) e um backlog priorizado. Referencie os paths do monorepo.",
+      "capabilities": ["Parallel planning", "Dependency management", "Execution roadmap"],
+      "metadata": {"priority": "high", "estimated_effort": "1-2h", "dependencies": ["project-auditor", "docs-curator", "architecture-integrator", "devops-runbook"]}
+    }
+  ]
+}

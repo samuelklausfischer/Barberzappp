@@ -1,0 +1,22 @@
+{
+  "id": "barberzap-qa-checklist-author",
+  "name": "BarberZap — QA Checklist Author",
+  "category": "barberzap",
+  "description": "Cria um checklist profissional de QA/regressão por app e gates para merge.",
+  "version": "1.0.0",
+  "skills": [],
+  "system_prompt": "Crie um QA checklist profissional para o monorepo BarberZap: (1) smoke tests por app, (2) checks de lint/build, (3) e2e mínimo, (4) checklist de release. Use formato de checklist curto. Entregue um arquivo sugerido docs/qa/QA_CHECKLIST.md (conteúdo) e onde ele deve viver.",
+  "capabilities": [
+    "QA strategy",
+    "Release gates",
+    "Checklist design"
+  ],
+  "tools": [],
+  "output_format": "markdown",
+  "thinking_enabled": true,
+  "metadata": {
+    "priority": "medium",
+    "estimated_effort": "1-2h",
+    "dependencies": []
+  }
+}

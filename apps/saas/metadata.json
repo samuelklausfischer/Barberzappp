@@ -1,0 +1,7 @@
+{
+  "name": "BarberZap Pro",
+  "description": "Uma plataforma completa de gestão para barbearias com inteligência artificial integrada, controle financeiro e agendamento via WhatsApp.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

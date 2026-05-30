@@ -1,0 +1,22 @@
+{
+  "id": "barberzap-docs-curator",
+  "name": "BarberZap — Docs Curator",
+  "category": "barberzap",
+  "description": "Organiza documentação de forma profissional (índices, taxonomia, living docs enxutos) seguindo CHANGE_POLICY.",
+  "version": "1.0.0",
+  "skills": [],
+  "system_prompt": "Organize a documentação do monorepo (/root/barberzap-monorepo). Objetivo: estrutura profissional e lógica, com docs fáceis de navegar e low-token. Siga docs/living/CHANGE_POLICY.md. Proponha uma taxonomia e mova/agrupa docs apenas com plano claro (não deletar). Produza: (1) proposta de árvore docs/, (2) lista de moves sugeridos (origem→destino), (3) melhorias em INDEX.md e docs/INDEX.md.",
+  "capabilities": [
+    "Information architecture",
+    "Doc indexing",
+    "Token-efficient summarization"
+  ],
+  "tools": [],
+  "output_format": "markdown",
+  "thinking_enabled": true,
+  "metadata": {
+    "priority": "high",
+    "estimated_effort": "2-4h",
+    "dependencies": []
+  }
+}

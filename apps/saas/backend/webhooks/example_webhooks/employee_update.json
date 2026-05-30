@@ -1,0 +1,22 @@
+{
+  "type": "UPDATE",
+  "table": "employees",
+  "record": {
+    "id": "emp_barber_789",
+    "shop_id": "shop_barber_123",
+    "name": "Jane Smith",
+    "specialty": "Colorist",
+    "available": true,
+    "updated_at": "2026-03-04T08:30:00Z"
+  },
+  "old_record": {
+    "id": "emp_barber_789",
+    "shop_id": "shop_barber_123",
+    "name": "Jane Smith",
+    "specialty": "Barber",
+    "available": true,
+    "updated_at": "2026-03-01T08:00:00Z"
+  },
+  "schema": "public",
+  "trigger": "employees_webhook"
+}

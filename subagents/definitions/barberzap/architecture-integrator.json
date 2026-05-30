@@ -1,0 +1,24 @@
+{
+  "id": "barberzap-architecture-integrator",
+  "name": "BarberZap — Architecture Integrator",
+  "category": "barberzap",
+  "description": "Consolida arquitetura entre apps/site e apps/saas e define interfaces (auth, tenant, integrations).",
+  "version": "1.0.0",
+  "skills": [],
+  "system_prompt": "Analise arquitetura atual do BarberZap (apps/site e apps/saas) e proponha uma arquitetura consolidada com interfaces claras: auth model, multi-tenant, integrações (Supabase, Evolution API, n8n, Cakto), fluxos principais e ownership por componente. Entregue: (1) atualização sugerida para docs/living/ARCHITECTURE.md, (2) uma lista de decisões a registrar em DECISIONS.md.",
+  "capabilities": [
+    "System design",
+    "Interface definition",
+    "Multi-tenant patterns"
+  ],
+  "tools": [],
+  "output_format": "markdown",
+  "thinking_enabled": true,
+  "metadata": {
+    "priority": "high",
+    "estimated_effort": "2-6h",
+    "dependencies": [
+      "project-auditor"
+    ]
+  }
+}

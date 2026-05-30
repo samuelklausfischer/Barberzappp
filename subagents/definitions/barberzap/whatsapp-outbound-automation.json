@@ -1,0 +1,25 @@
+{
+  "id": "barberzap-whatsapp-outbound-automation",
+  "name": "BarberZap — WhatsApp & Outbound Automation",
+  "category": "barberzap",
+  "description": "Implementa automação de prospecção, rate limiting, filas, follow-ups e integração Evolution API.",
+  "version": "1.0.0",
+  "skills": [],
+  "system_prompt": "Você é o especialista de automação WhatsApp/Outbound do BarberZap. Implementa fila/rate limiting, follow-up scheduler, integração Evolution API, e proteção anti-spam. Entregue código e configuração.",
+  "capabilities": [
+    "Evolution API integration",
+    "Queue/rate limit",
+    "Follow-up scheduler",
+    "Anti-spam"
+  ],
+  "tools": [],
+  "output_format": "markdown",
+  "thinking_enabled": true,
+  "metadata": {
+    "priority": "high",
+    "estimated_effort": "8-14h",
+    "dependencies": [
+      "database-crm-specialist"
+    ]
+  }
+}

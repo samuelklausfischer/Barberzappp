@@ -1,0 +1,663 @@
+# Multi-Region Docker Stack for BarberZap
+# Supports deployment across multiple regions (LATAM, US-East, US-West, EU, APAC)
+
+version: '3.9'
+
+# Global network configuration
+networks:
+  barberzap-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  # Redis data volumes
+  redis-master-latam:
+  redis-replica-latam-1:
+  redis-replica-latam-2:
+  redis-master-useast:
+  redis-replica-useast-1:
+  redis-replica-useast-2:
+  redis-master-uswest:
+  redis-replica-uswest-1:
+  redis-master-eu:
+  redis-replica-eu-1:
+  redis-master-ap:
+  redis-replica-ap-1:
+  
+  # BullMQ queue volumes (for persistence during restarts)
+  bullmq-jobs-latam:
+  bullmq-jobs-useast:
+  bullmq-jobs-uswest:
+  bullmq-jobs-eu:
+  bullmq-jobs-ap:
+  
+  # Worker logs
+  worker-logs-latam:
+  worker-logs-useast:
+  worker-logs-uswest:
+  worker-logs-eu:
+  worker-logs-ap:
+  
+  # Nginx logs
+  nginx-logs:
+  haproxy-logs:
+  
+  # Monitoring data
+  prometheus-data:
+  grafana-data:
+  loki-data:
+
+# Common services (run in all regions)
+services:
+  # ============================================
+  # LAYER 1: Load Balancers (Edge)
+  # ============================================
+  
+  nginx-lb:
+    build:
+      context: ../../
+      dockerfile: docker/nginx/Dockerfile
+    image: barberzap/nginx-lb:latest
+    container_name: nginx-lb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+      - ./config:/config:ro
+    environment:
+      - REGION=${REGION:-latam}
+      - UPSTREAM_USEAST=${UPSTREAM_USEAST:-}
+      - UPSTREAM_USWEST=${UPSTREAM_USWEST:-}
+      - UPSTREAM_EU=${UPSTREAM_EU:-}
+      - UPSTREAM_AP=${UPSTREAM_AP:-}
+    networks:
+      - barberzap-network
+    depends_on:
+      - backend-app
+      - frontend-app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+  
+  haproxy-lb:
+    image: haproxy:2.8-alpine
+    container_name: haproxy-lb
+    ports:
+      - "8404:8404"  # Stats page
+      - "1936:1936"  # Admin API
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - haproxy-logs:/var/log/haproxy
+    environment:
+      - REGION=${REGION:-latam}
+    networks:
+      - barberzap-network
+    depends_on:
+      - backend-app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "timeout", "2", "sh", "-c", "echo 'show info' | nc localhost 1936"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ============================================
+  # LAYER 2: Regional Infrastructure - LATAM
+  # ============================================
+  
+  # Redis Sentinel cluster for LATAM
+  redis-master-latam:
+    image: redis:7-alpine
+    container_name: redis-master-latam
+    command: >
+      redis-server
+      --port 6379
+      --bind 0.0.0.0
+      --protected-mode no
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+      --appendfilename appendonly-latam.aof
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --replica-serve-stale-data yes
+      --latency-monitor-threshold 100
+      --maxclients 10000
+    ports:
+      - "6379:6379"
+      - "16379:16379"  # Cluster bus
+    volumes:
+      - redis-master-latam:/data
+      - ./config/redis/latam.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
+  
+  redis-replica-latam:
+    image: redis:7-alpine
+    container_name: redis-replica-latam
+    command: >
+      redis-server
+      --port 6380
+      --bind 0.0.0.0
+      --protected-mode no
+      --cluster-enabled yes
+      --cluster-config-file nodes-replica.conf
+      --cluster-node-timeout 5000
+      --slaveof redis-master-latam 6379
+      --appendonly yes
+      --replica-read-only no
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6380"
+      - "16380:16380"
+    volumes:
+      - redis-replica-latam:/data
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-latam
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6380", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  
+  redis-sentinel-latam:
+    image: redis:7-alpine
+    container_name: redis-sentinel-latam
+    command: /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./config/redis/sentinel-latam.conf:/usr/local/etc/redis/sentinel.conf:ro
+    ports:
+      - "26379:26379"
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-latam
+    restart: unless-stopped
+
+  # BullMQ Workers for LATAM
+  bullmq-worker-latam:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    image: barberzap/worker:${BUILD_TAG:-latest}
+    container_name: bullmq-worker-latam
+    command: ["python", "-m", "backend.workers.bullmq_worker", "--region", "latam"]
+    environment:
+      - REDIS_HOST=redis-master-latam
+      - REDIS_PORT=6379
+      - REGION=latam
+      - SUPABASE_URL=${SUPABASE_URL_LATAM}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - WORKER_CONCURRENCY=5
+      - LOG_LEVEL=INFO
+    volumes:
+      - bullmq-jobs-latam:/tmp/jobs
+      - worker-logs-latam:/var/log/worker
+      - ../../backend:/app/backend:ro
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-latam
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 3
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+    
+  # ============================================
+  # LAYER 2: Regional Infrastructure - US East
+  # ============================================
+  
+  redis-master-useast:
+    image: redis:7-alpine
+    container_name: redis-master-useast
+    command: >
+      redis-server
+      --port 7379
+      --bind 0.0.0.0
+      --protected-mode no
+      --cluster-enabled yes
+      --cluster-config-file nodes-useast.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "7379:7379"
+      - "17379:17379"
+    volumes:
+      - redis-master-useast:/data
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
+  
+  redis-sentinel-useast:
+    image: redis:7-alpine
+    container_name: redis-sentinel-useast
+    command: /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./config/redis/sentinel-useast.conf:/usr/local/etc/redis/sentinel.conf:ro
+    ports:
+      - "36379:26379"
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-useast
+    restart: unless-stopped
+
+  bullmq-worker-useast:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    image: barberzap/worker:${BUILD_TAG:-latest}
+    command: ["python", "-m", "backend.workers.bullmq_worker", "--region", "us-east"]
+    environment:
+      - REDIS_HOST=redis-master-useast
+      - REDIS_PORT=7379
+      - REGION=us-east
+      - SUPABASE_URL=${SUPABASE_URL_USEAST}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - WORKER_CONCURRENCY=5
+    volumes:
+      - bullmq-jobs-useast:/tmp/jobs
+      - ../../backend:/app/backend:ro
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-useast
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 2
+
+  # ============================================
+  # LAYER 2: Regional Infrastructure - US West
+  # ============================================
+  
+  redis-master-uswest:
+    image: redis:7-alpine
+    container_name: redis-master-uswest
+    command: >
+      redis-server
+      --port 8379
+      --bind 0.0.0.0
+      --protected-mode no
+      --cluster-enabled yes
+      --appendonly yes
+      --maxmemory 2gb
+    ports:
+      - "8379:8379"
+    volumes:
+      - redis-master-uswest:/data
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+
+  bullmq-worker-uswest:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    image: barberzap/worker:${BUILD_TAG:-latest}
+    command: ["python", "-m", "backend.workers.bullmq_worker", "--region", "us-west"]
+    environment:
+      - REDIS_HOST=redis-master-uswest
+      - REDIS_PORT=8379
+      - REGION=us-west
+      - SUPABASE_URL=${SUPABASE_URL_USWEST}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    volumes:
+      - bullmq-jobs-uswest:/tmp/jobs
+      - ../../backend:/app/backend:ro
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-uswest
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  # ============================================
+  # LAYER 2: Regional Infrastructure - Europe
+  # ============================================
+  
+  redis-master-eu:
+    image: redis:7-alpine
+    container_name: redis-master-eu
+    command: >
+      redis-server
+      --port 9379
+      --bind 0.0.0.0
+      --protected-mode no
+      --cluster-enabled yes
+      --appendonly yes
+      --maxmemory 2gb
+    ports:
+      - "9379:9379"
+    volumes:
+      - redis-master-eu:/data
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+
+  bullmq-worker-eu:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    image: barberzap/worker:${BUILD_TAG:-latest}
+    command: ["python", "-m", "backend.workers.bullmq_worker", "--region", "eu-central"]
+    environment:
+      - REDIS_HOST=redis-master-eu
+      - REDIS_PORT=9379
+      - REGION=eu-central
+      - SUPABASE_URL=${SUPABASE_URL_EU}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    volumes:
+      - bullmq-jobs-eu:/tmp/jobs
+      - ../../backend:/app/backend:ro
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-eu
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  # ============================================
+  # LAYER 2: Regional Infrastructure - Asia Pacific
+  # ============================================
+  
+  redis-master-ap:
+    image: redis:7-alpine
+    container_name: redis-master-ap
+    command: >
+      redis-server
+      --port 10379
+      --bind 0.0.0.0
+      --protected-mode no
+      --cluster-enabled yes
+      --appendonly yes
+      --maxmemory 2gb
+    ports:
+      - "10379:10379"
+    volumes:
+      - redis-master-ap:/data
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+
+  bullmq-worker-ap:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    image: barberzap/worker:${BUILD_TAG:-latest}
+    command: ["python", "-m", "backend.workers.bullmq_worker", "--region", "asia-pacific"]
+    environment:
+      - REDIS_HOST=redis-master-ap
+      - REDIS_PORT=10379
+      - REGION=asia-pacific
+      - SUPABASE_URL=${SUPABASE_URL_AP}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    volumes:
+      - bullmq-jobs-ap:/tmp/jobs
+      - ../../backend:/app/backend:ro
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-ap
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  # ============================================
+  # LAYER 3: Application Services (regional)
+  # ============================================
+  
+  backend-app:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    image: barberzap/backend:${BUILD_TAG:-latest}
+    container_name: backend-app
+    command: ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      - REGION=${REGION:-latam}
+      - SUPABASE_URL=${SUPABASE_URL_LATAM}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - REDIS_HOST=redis-master-latam
+      - REDIS_PORT=6379
+      - REDIS_SENTINEL_HOST=redis-sentinel-latam
+      - REDIS_SENTINEL_PORT=26379
+      - DATABASE_TYPE=supabase
+      - ENABLE_REGION_ROUTING=true
+      - FALLBACK_REGIONS=us-east,us-west,eu-central,asia-pacific
+      - LOG_LEVEL=INFO
+      - CIRCUIT_BREAKER_ENABLED=true
+      - CIRCUIT_BREAKER_THRESHOLD=3
+      - CIRCUIT_BREAKER_TIMEOUT=60
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # Metrics
+    volumes:
+      - ../../backend:/app/backend:ro
+      - ../../config:/config:ro
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-latam
+      - redis-sentinel-latam
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      mode: replicated
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+
+  frontend-app:
+    build:
+      context: ../../
+      dockerfile: docker/frontend/Dockerfile
+    image: barberzap/frontend:${BUILD_TAG:-latest}
+    container_name: frontend-app
+    environment:
+      - NODE_ENV=production
+      - VITE_REGION=${REGION:-latam}
+      - VITE_API_URL=https://api.barberzap.com
+      - VITE_WS_URL=wss://ws.barberzap.com
+      - VITE_ENABLE_REGION_DETECTION=true
+    ports:
+      - "3000:80"
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ============================================
+  # LAYER 4: Monitoring & Observability
+  # ============================================
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+      - ./config/prometheus/rules:/etc/prometheus/rules:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=redis-datasource,cloudflare-datasource
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - barberzap-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/tmp/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter-latam
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis-master-latam:6379
+      - REDIS_EXPORTER_LOG_FORMAT=json
+      - REDIS_EXPORTER_EXPORT_CLIENT_LIST=false
+      - REDIS_EXPORTER_EXPORT_KEYS_PATTERN=*
+    networks:
+      - barberzap-network
+    depends_on:
+      - redis-master-latam
+    restart: unless-stopped
+
+  # ============================================
+  # LAYER 5: Region Manager Service
+  # ============================================
+  
+  region-manager:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    image: barberzap/region-manager:${BUILD_TAG:-latest}
+    container_name: region-manager
+    command: ["python", "-m", "deploy.region_manager", "--daemon"]
+    environment:
+      - REGION=${REGION:-latam}
+      - CONFIG_PATH=/config/region_config.json
+      - HEALTH_CHECK_INTERVAL=30
+      - LATENCY_CHECK_INTERVAL=60
+      - ENABLE_AUTO_FAILOVER=true
+    volumes:
+      - ./config/region_config.json:/config/region_config.json:ro
+      - ../../deploy:/app/deploy
+    ports:
+      - "9500:9500"  # Region manager API
+    networks:
+      - barberzap-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9500/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ============================================
+  # LAYER 6: Cloudflare Tunnel (for edge routing)
+  # ============================================
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+      - REGION=${REGION:-latam}
+    restart: unless-stopped
+    # This would connect to Cloudflare for edge routing
+    # Only needed in production

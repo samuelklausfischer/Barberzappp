@@ -1,0 +1,23 @@
+{
+  "id": "barberzap-project-auditor",
+  "name": "BarberZap — Project Auditor",
+  "category": "barberzap",
+  "description": "Faz inventário do monorepo, identifica redundâncias, dívidas técnicas e prioridades objetivas.",
+  "version": "1.0.0",
+  "skills": [],
+  "system_prompt": "Audite o monorepo /root/barberzap-monorepo com foco em: (1) inventário por app (site vs saas), (2) duplicidades e arquivos órfãos, (3) riscos (security, envs, secrets), (4) gaps entre docs e código, (5) lista priorizada de ações com impacto/risco/esforço. Entregue um relatório em Markdown com seções curtas e paths. Não reescreva o que já existe — referencie docs/living quando possível.",
+  "capabilities": [
+    "Repo inventory",
+    "Redundancy detection",
+    "Risk assessment",
+    "Prioritized action plan"
+  ],
+  "tools": [],
+  "output_format": "markdown",
+  "thinking_enabled": true,
+  "metadata": {
+    "priority": "critical",
+    "estimated_effort": "2-4h",
+    "dependencies": []
+  }
+}

@@ -1,0 +1,30 @@
+# BarberZap Cache Layer - Python Dependencies
+
+# Redis client
+redis>=5.0.0
+
+# JSON serialization (já incluído no Python padrão)
+# json
+
+# Async support (já incluído no Python padrão)
+# asyncio
+
+# Logging (já incluído no Python padrão)
+# logging
+
+# Dataclasses (Python 3.7+)
+# dataclasses
+
+# Type hints (Python 3.5+)
+# typing
+
+# Para produção com Supabase webhooks:
+# flask>=2.0.0  # ou fastapi>=0.68.0
+# supabase>=2.0.0
+
+# Para testes:
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
+
+# Monitoramento opcional:
+# prometheus-client>=0.16.0

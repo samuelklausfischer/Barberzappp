@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise de Funil - Barberzap</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px;
+      background: rgba(234, 179, 8, 0.1);
+      border: 2px solid rgba(234, 179, 8, 0.3);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .gold-text {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #9ca3af;
+      font-size: 1rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 25px;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title .icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      color: #d1d5db;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(234, 179, 8, 0.2);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #eab308;
+      box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+    }
+
+    .input-group input::placeholder {
+      color: #6b7280;
+    }
+
+    .funnel-stage {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s;
+    }
+
+    .funnel-stage:hover {
+      background: rgba(234, 179, 8, 0.1);
+      transform: translateX(5px);
+    }
+
+    .funnel-stage .stage-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .funnel-stage .stage-info {
+      flex: 1;
+    }
+
+    .funnel-stage .stage-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+
+    .funnel-stage .stage-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
+
+    .funnel-stage .stage-rate {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .funnel-stage .conversion-arrow {
+      font-size: 1.5rem;
+      color: #fbbf24;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .metric-card {
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .metric-card .metric-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      color: #d1d5db;
+    }
+
+    .metric-card .metric-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .metric-card .metric-value.good {
+      color: #22c55e;
+    }
+
+    .metric-card .metric-value.warning {
+      color: #f59e0b;
+    }
+
+    .metric-card .metric-value.bad {
+      color: #ef4444;
+    }
+
+    .investment-section {
+      grid-column: 1 / -1;
+    }
+
+    .roi-display {
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(245, 158, 11, 0.1));
+      border: 2px solid rgba(234, 179, 8, 0.4);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .roi-display .roi-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .roi-display .roi-value {
+      font-size: 2.5rem;
+      font-weight: 900;
+    }
+
+    .roi-display .roi-value.positive {
+      color: #22c55e;
+    }
+
+    .roi-display .roi-value.negative {
+      color: #ef4444;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 18px 30px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-style: italic;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(234, 179, 8, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .insights-box {
+      grid-column: 1 / -1;
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      margin-top: 20px;
+    }
+
+    .insights-box h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .insight-item {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: start;
+      gap: 12px;
+    }
+
+    .insight-item .alert-icon {
+      font-size: 1.2rem;
+    }
+
+    .insight-item .alert-text {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .export-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .export-modal.active {
+      display: flex;
+    }
+
+    .export-content {
+      background: #1a1a2e;
+      border: 2px solid rgba(234, 179, 8, 0.3);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .export-content h2 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .export-content pre {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .export-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .main-grid {
+        gap: 20px;
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 Análise de Funil <span class="gold-text">Barberzap</span></h1>
+      <p class="subtitle">Insira os dados do seu funil de vendas para análise detalhada</p>
+    </header>
+
+    <div class="main-grid">
+      <!-- Coluna 1: Inputs -->
+      <div class="card">
+        <div class="card-title">
+          <div class="icon">📝</div>
+          Insira os Dados
+        </div>
+
+        <div class="input-group">
+          <label>📱 Visitantes no Site</label>
+          <input type="number" id="visitors" placeholder="Ex: 1000" min="0" oninput="calculateFunnel()">
+        </div>
+
+        <div class="input-group">
+          <label>📖 Scroll 50% do Conteúdo</label>
+          <input type="number" id="scroll50" placeholder="Ex: 400" min="0" oninput="calculateFunnel()">
+        </div>
+
+        <div class="input-group">
+          <label>💳 Visualizaram o Plano/Preço</label>
+          <input type="number" id="viewPrice" placeholder="Ex: 200" min="0" oninput="calculateFunnel()">
+        </div>
+
+        <div class="input-group">
+          <label>🛒 Clicaram no Checkout (InitiateCheckout)</label>
+          <input type="number" id="initiateCheckout" placeholder="Ex: 50" min="0" oninput="calculateFunnel()">
+        </div>
+
+        <div class="input-group">
+          <label>✅ Vendas Realizadas (Purchase)</label>
+          <input type="number" id="purchases" placeholder="Ex: 5" min="0" oninput="calculateFunnel()">
+        </div>
+
+        <div class="input-group">
+          <label>💰 Investimento em Ads (R$)</label>
+          <input type="number" id="adSpend" placeholder="Ex: 112" min="0" step="0.01" oninput="calculateFunnel()">
+        </div>
+
+        <div class="input-group">
+          <label>💵 Valor da Assinatura (R$)</label>
+          <input type="number" id="ticketPrice" placeholder="Ex: 49.90" min="0" step="0.01" value="49.90" oninput="calculateFunnel()">
+        </div>
+      </div>
+
+      <!-- Coluna 2: Visualização -->
+      <div class="card">
+        <div class="card-title">
+          <div class="icon">📈</div>
+          Funil de Conversão
+        </div>
+
+        <div id="funnelVisualization">
+          <div class="funnel-stage">
+            <div class="stage-icon">📱</div>
+            <div class="stage-info">
+              <div class="stage-name">Visitantes</div>
+              <div class="stage-value" id="displayVisitors">-</div>
+            </div>
+          </div>
+
+          <div class="conversion-arrow">↓</div>
+
+          <div class="funnel-stage">
+            <div class="stage-icon">📖</div>
+            <div class="stage-info">
+              <div class="stage-name">Scroll 50%</div>
+              <div class="stage-value" id="displayScroll50">-</div>
+              <div class="stage-rate" id="rateScroll50">-</div>
+            </div>
+          </div>
+
+          <div class="conversion-arrow">↓</div>
+
+          <div class="funnel-stage">
+            <div class="stage-icon">💳</div>
+            <div class="stage-info">
+              <div class="stage-name">Viram o Preço</div>
+              <div class="stage-value" id="displayViewPrice">-</div>
+              <div class="stage-rate" id="rateViewPrice">-</div>
+            </div>
+          </div>
+
+          <div class="conversion-arrow">↓</div>
+
+          <div class="funnel-stage">
+            <div class="stage-icon">🛒</div>
+            <div class="stage-info">
+              <div class="stage-name">No Checkout</div>
+              <div class="stage-value" id="displayInitiateCheckout">-</div>
+              <div class="stage-rate" id="rateInitiateCheckout">-</div>
+            </div>
+          </div>
+
+          <div class="conversion-arrow">↓</div>
+
+          <div class="funnel-stage" style="border: 2px solid rgba(34, 197, 94, 0.5);">
+            <div class="stage-icon">✅</div>
+            <div class="stage-info">
+              <div class="stage-name">Vendas</div>
+              <div class="stage-value" id="displayPurchases" style="color: #22c55e;">-</div>
+              <div class="stage-rate" id="ratePurchases">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Conversão Total</div>
+            <div class="metric-value" id="totalConversion">-</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">CPA (Custo/Lead)</div>
+            <div class="metric-value" id="cpa">-</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">CAC (Custo/Cliente)</div>
+            <div class="metric-value" id="cac">-</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">ROI</div>
+            <div class="metric-value" id="roi">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROI Section -->
+      <div class="card investment-section">
+        <div class="card-title">
+          <div class="icon">💰</div>
+          Análise de Investimento
+        </div>
+
+        <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="metric-card">
+            <div class="metric-label">Investimento</div>
+            <div class="metric-value" id="displayAdSpend">R$ 0,00</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Receita Gerada</div>
+            <div class="metric-value good" id="displayRevenue">R$ 0,00</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Lucro/Prejuízo</div>
+            <div class="metric-value" id="displayProfit">R$ 0,00</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">ROAS</div>
+            <div class="metric-value" id="displayRoas">0x</div>
+          </div>
+        </div>
+
+        <div class="roi-display">
+          <div class="roi-label">Retorno sobre Investimento (ROI)</div>
+          <div class="roi-value" id="displayRoi">0%</div>
+        </div>
+      </div>
+
+      <!-- Insights Section -->
+      <div class="insights-box" id="insightsBox" style="display: none;">
+        <h3>⚠️ Alertas e Recomendações</h3>
+        <div id="insightsList"></div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="button-group">
+      <button class="btn btn-secondary" onclick="resetForm()">🔄 Resetar</button>
+      <button class="btn btn-primary" onclick="exportData()">💾 Salvar Análise</button>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="export-modal" id="exportModal">
+    <div class="export-content">
+      <h2>📋 Dados da Análise</h2>
+      <p style="margin-bottom: 15px; color: #9ca3af;">Copie estes dados e envie para análise</p>
+      <pre id="exportData"></pre>
+      <div class="export-actions">
+        <button class="btn btn-secondary" onclick="closeExport()">Fechar</button>
+        <button class="btn btn-primary" onclick="copyToClipboard()">📋 Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let funnelData = {};
+
+    function calculateFunnel() {
+      // Get values
+      const visitors = parseFloat(document.getElementById('visitors').value) || 0;
+      const scroll50 = parseFloat(document.getElementById('scroll50').value) || 0;
+      const viewPrice = parseFloat(document.getElementById('viewPrice').value) || 0;
+      const initiateCheckout = parseFloat(document.getElementById('initiateCheckout').value) || 0;
+      const purchases = parseFloat(document.getElementById('purchases').value) || 0;
+      const adSpend = parseFloat(document.getElementById('adSpend').value) || 0;
+      const ticketPrice = parseFloat(document.getElementById('ticketPrice').value) || 49.90;
+
+      // Store data
+      funnelData = {
+        visitors,
+        scroll50,
+        viewPrice,
+        initiateCheckout,
+        purchases,
+        adSpend,
+        ticketPrice,
+        timestamp: new Date().toISOString()
+      };
+
+      // Update display
+      document.getElementById('displayVisitors').textContent = visitors.toLocaleString('pt-BR');
+      document.getElementById('displayScroll50').textContent = scroll50.toLocaleString('pt-BR');
+      document.getElementById('displayViewPrice').textContent = viewPrice.toLocaleString('pt-BR');
+      document.getElementById('displayInitiateCheckout').textContent = initiateCheckout.toLocaleString('pt-BR');
+      document.getElementById('displayPurchases').textContent = purchases.toLocaleString('pt-BR');
+
+      // Calculate rates
+      const rateScroll50 = visitors > 0 ? (scroll50 / visitors * 100).toFixed(1) : 0;
+      const rateViewPrice = visitors > 0 ? (viewPrice / visitors * 100).toFixed(1) : 0;
+      const rateCheckout = visitors > 0 ? (initiateCheckout / visitors * 100).toFixed(1) : 0;
+      const ratePurchases = visitors > 0 ? (purchases / visitors * 100).toFixed(1) : 0;
+
+      document.getElementById('rateScroll50').textContent = `📊 ${rateScroll50}% dos visitantes`;
+      document.getElementById('rateViewPrice').textContent = `📊 ${rateViewPrice}% dos visitantes`;
+      document.getElementById('rateInitiateCheckout').textContent = `📊 ${rateCheckout}% dos visitantes`;
+      document.getElementById('ratePurchases').textContent = `📊 ${ratePurchases}% dos visitantes`;
+
+      // Calculate metrics
+      const totalConversion = ratePurchases;
+      const cpa = visitors > 0 ? (adSpend / visitors).toFixed(2) : 0;
+      const cac = purchases > 0 ? (adSpend / purchases).toFixed(2) : 0;
+      const revenue = purchases * ticketPrice;
+      const profit = revenue - adSpend;
+      const roas = adSpend > 0 ? (revenue / adSpend).toFixed(2) : 0;
+      const roi = adSpend > 0 ? ((profit / adSpend) * 100).toFixed(1) : 0;
+
+      document.getElementById('totalConversion').textContent = `${totalConversion}%`;
+      document.getElementById('cpa').textContent = `R$ ${parseFloat(cpa).toFixed(2)}`;
+      document.getElementById('cac').textContent = `R$ ${parseFloat(cac).toFixed(2)}`;
+      document.getElementById('roi').textContent = `${roi}%`;
+      document.getElementById('roi').className = 'metric-value ' + (parseFloat(roi) >= 0 ? 'good' : 'bad');
+
+      document.getElementById('displayAdSpend').textContent = `R$ ${adSpend.toFixed(2)}`;
+      document.getElementById('displayRevenue').textContent = `R$ ${revenue.toFixed(2)}`;
+      document.getElementById('displayProfit').textContent = `R$ ${profit.toFixed(2)}`;
+      document.getElementById('displayProfit').className = 'metric-value ' + (profit >= 0 ? 'good' : 'bad');
+      document.getElementById('displayRoas').textContent = `${roas}x`;
+      document.getElementById('displayRoi').textContent = `${roi}%`;
+      document.getElementById('displayRoi').className = 'roi-value ' + (parseFloat(roi) >= 0 ? 'positive' : 'negative');
+
+      // Generate insights
+      generateInsights(funnelData);
+    }
+
+    function generateInsights(data) {
+      const insights = [];
+
+      if (data.visitors > 0 && data.purchases === 0) {
+        insights.push({
+          icon: '🚨',
+          text: '<strong>CRÍTICO:</strong> Zero conversões! O problema está no checkout ou na oferta. Pessoas chegam até o checkout mas não compram.'
+        });
+      }
+
+      if (data.visitors > 0) {
+        const scrollRate = (data.scroll50 / data.visitors * 100);
+        if (scrollRate < 30) {
+          insights.push({
+            icon: '📉',
+            text: `<strong>BAIXO ENGAJAMENTO:</strong> Apenas ${scrollRate.toFixed(1)}% chegam ao meio da página. Considere revisar a headline e os primeiros elementos visuais.`
+          });
+        }
+      }
+
+      if (data.initiateCheckout > 0 && data.purchases === 0) {
+        insights.push({
+          icon: '💳',
+          text: '<strong>PROBLEMA NO CHECKOUT:</strong> ' + data.initiateCheckout + ' pessoas clicaram em comprar, mas ninguém concluiu. Verifique: 1) Checkout Cakto funcionando? 2) Formulário muito longo? 3) Falta de confiança?'
+        });
+      }
+
+      if (data.viewPrice > 0 && data.initiateCheckout === 0) {
+        insights.push({
+          icon: '🛒',
+          text: '<strong>BOTÃO DE CTA FRACO:</strong> Pessoas veem o preço mas não clicam em comprar. Teste: 1) Texto do botão, 2) Cor do botão, 3) Adicione "teste grátis"'
+        });
+      }
+
+      if (data.adSpend > 0 && data.purchases === 0) {
+        insights.push({
+          icon: '💸',
+          text: `<strong>PREJUÍZO ATUAL:</strong> Você gastou R$ ${data.adSpend.toFixed(2)} sem retorno. Implemente teste grátis de 7 dias para reduzir a barreira de entrada.`
+        });
+      }
+
+      if (data.viewPrice > 0) {
+        const checkoutRate = (data.initiateCheckout / data.viewPrice * 100);
+        if (checkoutRate < 20 && data.initiateCheckout > 0) {
+          insights.push({
+            icon: '🎯',
+            text: `<strong>QUEDA NO PREÇO:</strong> Apenas ${checkoutRate.toFixed(1)}% que viram o preço clicaram em comprar. Considere: 1) Reduzir para R$ 29,90, 2) Oferecer 1º mês grátis, 3) Adicionar prova social antes do preço`
+          });
+        }
+      }
+
+      if (data.purchases > 0) {
+        const cac = data.adSpend / data.purchases;
+        if (cac > data.ticketPrice * 3) {
+          insights.push({
+            icon: '⚠️',
+            text: `<strong>CAC MUITO ALTO:</strong> R$ ${cac.toFixed(2)} por cliente enquanto o ticket é R$ ${data.ticketPrice.toFixed(2)}. Você precisa de pelo menos 4 meses para recuperar o investimento apenas desse cliente.`
+          });
+        }
+      }
+
+      // Display insights
+      const insightsBox = document.getElementById('insightsBox');
+      const insightsList = document.getElementById('insightsList');
+
+      if (insights.length > 0) {
+        insightsBox.style.display = 'block';
+        insightsList.innerHTML = insights.map(i => `
+          <div class="insight-item">
+            <div class="alert-icon">${i.icon}</div>
+            <div class="alert-text">${i.text}</div>
+          </div>
+        `).join('');
+      } else {
+        insightsBox.style.display = 'none';
+      }
+    }
+
+    function resetForm() {
+      document.querySelectorAll('input').forEach(input => input.value = '');
+      calculateFunnel();
+    }
+
+    function exportData() {
+      const exportText = JSON.stringify(funnelData, null, 2);
+      document.getElementById('exportData').textContent = exportText;
+      document.getElementById('exportModal').classList.add('active');
+    }
+
+    function closeExport() {
+      document.getElementById('exportModal').classList.remove('active');
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById('exportData').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Dados copiados! Cole no chat para análise.');
+        closeExport();
+      });
+    }
+
+    // Close modal on outside click
+    document.getElementById('exportModal').addEventListener('click', function(e) {
+      if (e.target === this) closeExport();
+    });
+  </script>
+</body>
+</html>

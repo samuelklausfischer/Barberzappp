@@ -1,0 +1,41 @@
+{
+  "name": "@barberzap/jobs",
+  "version": "1.0.0",
+  "description": "BullMQ background jobs system for BarberZap",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "node --loader ts-node/esm index.ts",
+    "test": "ts-node examples.ts",
+    "stats": "ts-node cli.ts stats",
+    "health": "ts-node cli.ts health",
+    "queue": "ts-node cli.ts queue",
+    "job": "ts-node cli.ts job",
+    "retry": "ts-node cli.ts retry",
+    "retry-all": "ts-node cli.ts retry-all",
+    "clean": "ts-node cli.ts clean",
+    "clean-dlq": "ts-node cli.ts clean-dlq",
+    "list": "ts-node cli.ts list"
+  },
+  "dependencies": {
+    "bullmq": "^5.12.0",
+    "ioredis": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.7.0",
+    "typescript": "~5.8.2"
+  },
+  "keywords": [
+    "bullmq",
+    "queue",
+    "jobs",
+    "background",
+    "workers",
+    "barberzap"
+  ],
+  "author": "BarberZap",
+  "license": "MIT"
+}

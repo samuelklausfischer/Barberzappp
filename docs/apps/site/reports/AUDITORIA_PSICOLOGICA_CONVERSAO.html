@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoria Profunda de Conversão | Barberzap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #0f172a; color: #f1f5f9; }
+        .reason-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; border: 1px solid #1e293b; }
+        .reason-card:hover { transform: translateY(-10px); border-color: #3b82f6; background: #1e293b; }
+        .icon-box { transition: all 0.3s ease; }
+        .reason-card:hover .icon-box { transform: scale(1.2) rotate(5deg); }
+        .badge-critical { background: #ef4444; color: white; padding: 2px 8px; rounded: 4px; font-size: 10px; font-weight: bold; }
+        .line-draw { height: 2px; background: linear-gradient(90deg, #3b82f6, transparent); margin: 20px 0; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <span class="text-blue-500 font-bold uppercase tracking-[0.2em] text-sm">Análise de Comportamento do Usuário</span>
+            <h1 class="text-4xl md:text-6xl font-800 mt-2 mb-4">Por que as 73 pessoas <span class="text-blue-500 underline decoration-wavy">fugiram</span>?</h1>
+            <p class="text-slate-400 max-w-2xl mx-auto">Não é apenas o preço. É uma combinação de barreiras psicológicas que matam a confiança no último segundo. Aqui estão os 6 vilões da sua conversão.</p>
+        </header>
+
+        <!-- Grid de Motivos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- Motivo 1 -->
+            <div class="reason-card bg-slate-900/50 p-8 rounded-3xl">
+                <div class="icon-box w-14 h-14 bg-blue-600/20 rounded-2xl flex items-center justify-center mb-6 text-blue-500 text-2xl">
+                    <i class="fas fa-lock-open"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">1. Barreira do Compromisso</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">O barbeiro quer testar se a IA entende o sotaque dos clientes dele antes de abrir a carteira.</p>
+                <div class="bg-slate-800 p-3 rounded-xl border-l-4 border-amber-500 italic text-xs text-slate-300">
+                    "E se eu pagar e não souber usar?"
+                </div>
+                <div class="mt-4 flex items-center text-xs font-bold text-emerald-400">
+                    <i class="fas fa-magic mr-2"></i> SOLUÇÃO: Teste Grátis 7 Dias
+                </div>
+            </div>
+
+            <!-- Motivo 2 -->
+            <div class="reason-card bg-slate-900/50 p-8 rounded-3xl">
+                <div class="icon-box w-14 h-14 bg-purple-600/20 rounded-2xl flex items-center justify-center mb-6 text-purple-500 text-2xl">
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">2. Obesidade de Campos</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">Se o checkout pede CPF, CEP e Endereço, o usuário no celular desiste por preguiça ou medo.</p>
+                <div class="bg-slate-800 p-3 rounded-xl border-l-4 border-red-500 italic text-xs text-slate-300">
+                    "Para que eles querem meu CEP se o produto é digital?"
+                </div>
+                <div class="mt-4 flex items-center text-xs font-bold text-emerald-400">
+                    <i class="fas fa-magic mr-2"></i> SOLUÇÃO: Apenas Nome/Whats
+                </div>
+            </div>
+
+            <!-- Motivo 3 -->
+            <div class="reason-card bg-slate-900/50 p-8 rounded-3xl">
+                <div class="icon-box w-14 h-14 bg-emerald-600/20 rounded-2xl flex items-center justify-center mb-6 text-emerald-500 text-2xl">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">3. O "Vácuo" do Redirect</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">O tempo entre clicar no site e carregar o Cakto. Se demorar 3 segundos, a atenção morre.</p>
+                <div class="bg-slate-800 p-3 rounded-xl border-l-4 border-blue-500 italic text-xs text-slate-300">
+                    "Site travou, vou voltar pro Instagram."
+                </div>
+                <div class="mt-4 flex items-center text-xs font-bold text-emerald-400">
+                    <i class="fas fa-magic mr-2"></i> SOLUÇÃO: Checkout na Página
+                </div>
+            </div>
+
+            <!-- Motivo 4 -->
+            <div class="reason-card bg-slate-900/50 p-8 rounded-3xl">
+                <div class="icon-box w-14 h-14 bg-amber-600/20 rounded-2xl flex items-center justify-center mb-6 text-amber-500 text-2xl">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">4. Síndrome do "Parece Golpe"</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">O checkout da Cakto é visualmente diferente do seu site. Essa quebra de design gera alerta.</p>
+                <div class="bg-slate-800 p-3 rounded-xl border-l-4 border-amber-500 italic text-xs text-slate-300">
+                    "Saí do site oficial e fui pra uma página estranha."
+                </div>
+                <div class="mt-4 flex items-center text-xs font-bold text-emerald-400">
+                    <i class="fas fa-magic mr-2"></i> SOLUÇÃO: Selos de Segurança
+                </div>
+            </div>
+
+            <!-- Motivo 5 -->
+            <div class="reason-card bg-slate-900/50 p-8 rounded-3xl">
+                <div class="icon-box w-14 h-14 bg-pink-600/20 rounded-2xl flex items-center justify-center mb-6 text-pink-500 text-2xl">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">5. Ausência de Socorro</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">73 pessoas tiveram uma dúvida final e não tinham onde clicar para perguntar.</p>
+                <div class="bg-slate-800 p-3 rounded-xl border-l-4 border-emerald-500 italic text-xs text-slate-300">
+                    "Será que aceita minha barbearia que é só de 1 cadeira?"
+                </div>
+                <div class="mt-4 flex items-center text-xs font-bold text-emerald-400">
+                    <i class="fas fa-magic mr-2"></i> SOLUÇÃO: Botão Whats no Checkout
+                </div>
+            </div>
+
+            <!-- Motivo 6 -->
+            <div class="reason-card bg-slate-900/50 p-8 rounded-3xl border-2 border-blue-500/30">
+                <div class="icon-box w-14 h-14 bg-blue-600/40 rounded-2xl flex items-center justify-center mb-6 text-blue-400 text-2xl">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">6. Atrito do Cartão</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">O barbeiro prefere PIX. Pedir cartão de crédito para uma assinatura é um 'não' automático para muitos.</p>
+                <div class="bg-slate-800 p-3 rounded-xl border-l-4 border-emerald-500 italic text-xs text-slate-300">
+                    "Não quero gastar meu limite, prefiro pagar todo mês no PIX."
+                </div>
+                <div class="mt-4 flex items-center text-xs font-bold text-emerald-400">
+                    <i class="fas fa-magic mr-2"></i> SOLUÇÃO: PIX em Destaque
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Estratégia de Guerra -->
+        <div class="mt-16 bg-blue-900/20 border border-blue-800/50 p-8 rounded-[40px]">
+            <h2 class="text-3xl font-black mb-8 text-center">Estratégia de Recuperação</h2>
+            <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
+                <div class="text-center">
+                    <div class="text-4xl font-black text-blue-500">73</div>
+                    <div class="text-xs uppercase tracking-widest text-slate-500">Oportunidades</div>
+                </div>
+                <div class="hidden md:block text-2xl text-slate-700">➜</div>
+                <div class="bg-slate-900 p-6 rounded-3xl flex-1 max-w-md border border-slate-800">
+                    <h4 class="font-bold mb-4 text-emerald-400"><i class="fas fa-check-circle mr-2"></i>Plano para AMANHÃ:</h4>
+                    <ul class="text-sm space-y-3 text-slate-400">
+                        <li>1. Trocar "Comprar" por <strong>"Criar Minha Barbearia Grátis"</strong>.</li>
+                        <li>2. Capturar o WhatsApp <strong>antes</strong> de enviar para o checkout.</li>
+                        <li>3. Se ele não pagar, o robô chama ele no Whats em 15 min automaticamente.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-12 text-center text-slate-600 text-xs uppercase tracking-widest">
+            Barberzap Conversion Intelligence &copy; 2026
+        </footer>
+    </div>
+</body>
+</html>

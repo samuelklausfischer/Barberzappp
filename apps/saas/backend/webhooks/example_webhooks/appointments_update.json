@@ -1,0 +1,26 @@
+{
+  "type": "UPDATE",
+  "table": "appointments",
+  "record": {
+    "id": "apt_001",
+    "shop_id": "shop_barber_123",
+    "client_id": "client_john_456",
+    "employee_id": "emp_barber_789",
+    "service_id": "svc_haircut_101",
+    "scheduled_at": "2026-03-04T10:00:00Z",
+    "status": "completed",
+    "updated_at": "2026-03-04T11:00:00Z"
+  },
+  "old_record": {
+    "id": "apt_001",
+    "shop_id": "shop_barber_123",
+    "client_id": "client_john_456",
+    "employee_id": "emp_barber_789",
+    "service_id": "svc_haircut_101",
+    "scheduled_at": "2026-03-04T10:00:00Z",
+    "status": "confirmed",
+    "updated_at": "2026-03-04T08:00:00Z"
+  },
+  "schema": "public",
+  "trigger": "appointments_webhook"
+}

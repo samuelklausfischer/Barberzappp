@@ -1,0 +1,18 @@
+# Supabase Webhook System Requirements
+
+# Core dependencies
+# redis>=5.0.0
+# fastapi>=0.104.0
+# uvicorn>=0.24.0
+
+# CLI
+# click>=8.1.0
+
+# Async runtime
+# asyncio (Python 3.7+ built-in)
+
+# Logging and utilities (usually installed with Python)
+# hmac (Python built-in)
+# hashlib (Python built-in)
+# json (Python built-in)
+# datetime (Python built-in)
