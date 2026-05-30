@@ -1,0 +1,109 @@
+{
+  "name": "video-generator",
+  "description": "Genera videos using OpenAI Sora API and other video generation providers",
+  "version": "1.0.0",
+  "author": "BarberZap AI",
+  "capabilities": [
+    "Video generation from text prompts",
+    "Video style transfer",
+    "Video editing operations"
+  ],
+  "models": {
+    "openai_sora": {
+      "provider": "openai",
+      "api_endpoint": "https://api.openai.com/v1/videos/generations",
+      "requires_authentication": true,
+      "authentication_type": "bearer_token",
+      "status": "restricted_access"
+    },
+    "runway_gen2": {
+      "provider": "runway_ml",
+      "api_endpoint": "https://api.runwayml.com/v1/generate",
+      "requires_authentication": true,
+      "authentication_type": "api_key",
+      "status": "available"
+    },
+    "stability_video": {
+      "provider": "stability_ai",
+      "api_endpoint": "https://api.stability.ai/v2beta/video/generate",
+      "requires_authentication": true,
+      "authentication_type": "api_key",
+      "status": "available"
+    }
+  },
+  "parameters": {
+    "prompt": {
+      "type": "string",
+      "required": true,
+      "description": "Text prompt describing the video to generate"
+    },
+    "model": {
+      "type": "string",
+      "required": false,
+      "default": "openai_sora",
+      "description": "Video generation model to use",
+      "enum": ["openai_sora", "runway_gen2", "stability_video"]
+    },
+    "duration": {
+      "type": "integer",
+      "required": false,
+      "default": 10,
+      "description": "Video duration in seconds (model-dependent)"
+    },
+    "resolution": {
+      "type": "string",
+      "required": false,
+      "default": "1080p",
+      "description": "Video resolution",
+      "enum": ["720p", "1080p", "4k"]
+    },
+    "aspect_ratio": {
+      "type": "string",
+      "required": false,
+      "default": "16:9",
+      "description": "Video aspect ratio",
+      "enum": ["16:9", "9:16", "1:1", "4:3"]
+    },
+    "style": {
+      "type": "string",
+      "required": false,
+      "description": "Video style preset"
+    },
+    "negative_prompt": {
+      "type": "string",
+      "required": false,
+      "description": "What to avoid in the video"
+    }
+  },
+  "response_format": {
+    "video_url": "string",
+    "video_id": "string",
+    "duration": "integer",
+    "resolution": "string",
+    "status": "string",
+    "created_at": "string",
+    "expires_at": "string"
+  },
+  "rate_limits": {
+    "requests_per_minute": null,
+    "concurrent_generations": null,
+    "daily_limit": null
+  },
+  "example_payload": {
+    "model": "openai_sora",
+    "prompt": "A barber shop in São Paulo, Brazil, with golden lights, modern interior, barber cutting hair",
+    "duration": 15,
+    "resolution": "1080p",
+    "aspect_ratio": "16:9",
+    "style": "cinematic"
+  },
+  "example_response": {
+    "video_url": "https://cdn.openai.com/videos/xyz123.mp4",
+    "video_id": "openai_sora_xyz123",
+    "duration": 15,
+    "resolution": "1080p",
+    "status": "completed",
+    "created_at": "2026-02-24T10:00:00Z",
+    "expires_at": "2026-02-28T10:00:00Z"
+  }
+}

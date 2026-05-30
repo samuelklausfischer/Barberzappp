@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoria Meta Ads - BarberZap</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background: #f4f4f9; }
+        h1 { color: #1d4ed8; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; }
+        h2 { color: #1e293b; margin-top: 30px; }
+        .status { font-weight: bold; padding: 4px 8px; rounded: 4px; border-radius: 4px; }
+        .pass { background: #dcfce7; color: #166534; }
+        .warning { background: #fef9c3; color: #854d0e; }
+        .fail { background: #fee2e2; color: #991b1b; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        ul { padding-left: 20px; }
+        code { background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+        .suggestion { font-style: italic; color: #475569; border-left: 4px solid #1d4ed8; padding-left: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Auditoria: Landing Page vs. Políticas da Meta (2026)</h1>
+    
+    <p>Este documento analisa a página <strong>BarberZap</strong> em relação às normas do Meta Ads (Facebook/Instagram) para evitar reprovações de anúncios e bloqueios de conta.</p>
+
+    <div class="card">
+        <h2>1. Rodapé e Transparência</h2>
+        <p><span class="status fail">REPROVADO</span></p>
+        <p><strong>Problema:</strong> O rodapé atual não contém informações legais obrigatórias. A Meta exige que o usuário saiba exatamente com quem está fazendo negócio.</p>
+        <ul>
+            <li>Faltam links para <strong>Política de Privacidade</strong> e <strong>Termos de Uso</strong>.</li>
+            <li>Falta a identificação da empresa (Razão Social ou Nome Fantasia e <strong>CNPJ</strong>).</li>
+            <li>Falta um endereço físico ou forma de contato clara (E-mail/Telefone).</li>
+            <li>Falta o <strong>Disclaimer</strong> de não afiliação com a Meta.</li>
+        </ul>
+        <div class="suggestion">
+            <strong>Como Arrumar:</strong> Adicionar ao final do rodapé: "© 2026 NOME DA EMPRESA - CNPJ: 00.000.000/0001-00. Endereço: Rua Exemplo, 123. Links: Política de Privacidade | Termos de Uso. Este site não faz parte do site do Facebook ou da Meta Platforms, Inc."
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>2. Escassez e Urgência (Vagas e Timer)</h2>
+        <p><span class="status warning">ALERTA DE RISCO</span></p>
+        <p><strong>Problema:</strong> O contador de vagas dinâmico que diminui sozinho (`Math.random()`) pode ser interpretado como "Prática Comercial Enganosa" se o algoritmo da Meta detectar que ele reseta a cada recarregamento da página.</p>
+        <ul>
+            <li>A Meta penaliza "Fake Scarcity" (escassez falsa).</li>
+        </ul>
+        <div class="suggestion">
+            <strong>Como Arrumar:</strong> Em vez de um número aleatório puro, seria ideal que o número de vagas fosse mais "sóbrio" ou que a promessa de valor vitalício seja o foco, não apenas o número de vagas caindo rápido demais.
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>3. Promessas e Copywriting</h2>
+        <p><span class="status pass">APROVADO COM RESSALVAS</span></p>
+        <p><strong>Análise:</strong> Promessas como "Sua agenda lota sozinha" são fortes, mas permitidas desde que o produto realmente entregue automação.</p>
+        <ul>
+            <li>Evite usar termos como "Garantido" ou "100% de chance" sem disclaimer de que os resultados variam de negócio para negócio.</li>
+            <li>A seção de "Garantia Blindada" é excelente e ajuda na aprovação, pois mostra segurança ao consumidor.</li>
+        </ul>
+        <div class="suggestion">
+            <strong>Sugestão:</strong> Adicionar um pequeno texto de "Resultados podem variar de acordo com a dedicação e o uso correto da ferramenta" próximo à seção de resultados.
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>4. Prova Social (Popups)</h2>
+        <p><span class="status pass">APROVADO</span></p>
+        <p><strong>Análise:</strong> Popups de "Novo Assinante" são comuns e ajudam na conversão. Desde que não sobreponham elementos importantes de navegação ou o botão de fechar (em dispositivos móveis).</p>
+        <div class="suggestion">
+            <strong>Dica:</strong> Garanta que o popup não cubra o botão principal de CTA no celular, o que pode causar uma "Experiência de Baixa Qualidade".
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Resumo de Ações para Aprovação Imediata:</h2>
+        <ol>
+            <li><strong>Implementar Rodapé Legal:</strong> Adicionar CNPJ, Endereço e links de termos.</li>
+            <li><strong>Criar as Páginas Legais:</strong> Mesmo que simples, os links precisam levar a algum lugar (pode ser um modal ou nova rota).</li>
+            <li><strong>Aviso de Localização:</strong> O uso de geolocalização é permitido, mas transparência sobre cookies é recomendada.</li>
+        </ol>
+    </div>
+
+    <p style="font-size: 0.8em; color: #666; text-align: center;">Auditoria realizada de acordo com as diretrizes da Meta Ads de Janeiro de 2026.</p>
+</body>
+</html>

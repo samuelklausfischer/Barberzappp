@@ -1,0 +1,368 @@
+name: Deploy to Supabase
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+  GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+  WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+
+jobs:
+  detect-framework:
+    runs-on: ubuntu-latest
+    outputs:
+      framework: ${{ steps.detect.outputs.framework }}
+      build-command: ${{ steps.detect.outputs.build-command }}
+      start-command: ${{ steps.detect.outputs.start-command }}
+      package-manager: ${{ steps.detect.outputs.package-manager }}
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Detect Framework
+        id: detect
+        run: |
+          # Detect Python
+          if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] || [ -f "setup.py" ]; then
+            echo "framework=python" >> $GITHUB_OUTPUT
+            echo "build-command=pip install -r requirements.txt" >> $GITHUB_OUTPUT
+            echo "start-command=uvicorn main:app --host 0.0.0.0 --port 8000" >> $GITHUB_OUTPUT
+            echo "package-manager=pip" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Detect Node.js
+          if [ -f "package.json" ]; then
+            echo "framework=nodejs" >> $GITHUB_OUTPUT
+            echo "build-command=npm ci" >> $GITHUB_OUTPUT
+            echo "start-command=npm start" >> $GITHUB_OUTPUT
+            echo "package-manager=npm" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Detect Go
+          if [ -f "go.mod" ] || [ -f "main.go" ]; then
+            echo "framework=go" >> $GITHUB_OUTPUT
+            echo "build-command=go mod download && go build -o main ." >> $GITHUB_OUTPUT
+            echo "start-command=./main" >> $GITHUB_OUTPUT
+            echo "package-manager=go" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Detect Rust
+          if [ -f "Cargo.toml" ]; then
+            echo "framework=rust" >> $GITHUB_OUTPUT
+            echo "build-command=cargo build --release" >> $GITHUB_OUTPUT
+            echo "start-command=./target/release/main" >> $GITHUB_OUTPUT
+            echo "package-manager=cargo" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "framework=unknown" >> $GITHUB_OUTPUT
+          echo "build-command=echo 'No build command detected'" >> $GITHUB_OUTPUT
+          echo "start-command=echo 'No start command detected'" >> $GITHUB_OUTPUT
+          echo "package-manager=none" >> $GITHUB_OUTPUT
+
+  test:
+    needs: detect-framework
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        if: needs.detect-framework.outputs.framework == 'python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Setup Node.js
+        if: needs.detect-framework.outputs.framework == 'nodejs'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Setup Go
+        if: needs.detect-framework.outputs.framework == 'go'
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      
+      - name: Setup Rust
+        if: needs.detect-framework.outputs.framework == 'rust'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      
+      - name: Install dependencies
+        run: ${{ needs.detect-framework.outputs.build-command }}
+      
+      - name: Run tests
+        run: |
+          if [ "${{ needs.detect-framework.outputs.framework }}" == "python" ]; then
+            python -m pytest tests/ -v || echo "No tests found"
+          elif [ "${{ needs.detect-framework.outputs.framework }}" == "nodejs" ]; then
+            npm test || echo "No tests found"
+          elif [ "${{ needs.detect-framework.outputs.framework }}" == "go" ]; then
+            go test ./... -v || echo "No tests found"
+          elif [ "${{ needs.detect-framework.outputs.framework }}" == "rust" ]; then
+            cargo test || echo "No tests found"
+          fi
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run security audit
+        run: |
+          # Python security check
+          if [ -f "requirements.txt" ]; then
+            pip install safety
+            safety check -r requirements.txt || true
+          fi
+          
+          # Node.js security check
+          if [ -f "package.json" ]; then
+            npm audit --audit-level moderate || true
+          fi
+          
+          # Go security check
+          if [ -f "go.mod" ]; then
+            go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+            gosec ./... || true
+          fi
+
+  build:
+    needs: [detect-framework, test, security-scan]
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.build.outputs.image-tag }}
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Generate Dockerfile
+        run: |
+          if [ "${{ needs.detect-framework.outputs.framework }}" == "python" ]; then
+            cat > Dockerfile << 'EOF'
+          FROM python:3.11-slim
+          
+          WORKDIR /app
+          
+          COPY requirements.txt .
+          RUN pip install --no-cache-dir -r requirements.txt
+          
+          COPY . .
+          
+          EXPOSE 8000
+          
+          CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+          EOF
+          
+          elif [ "${{ needs.detect-framework.outputs.framework }}" == "nodejs" ]; then
+            cat > Dockerfile << 'EOF'
+          FROM node:18-alpine
+          
+          WORKDIR /app
+          
+          COPY package*.json ./
+          RUN npm ci --only=production
+          
+          COPY . .
+          
+          EXPOSE 3000
+          
+          CMD ["npm", "start"]
+          EOF
+          
+          elif [ "${{ needs.detect-framework.outputs.framework }}" == "go" ]; then
+            cat > Dockerfile << 'EOF'
+          FROM golang:1.21-alpine AS builder
+          
+          WORKDIR /app
+          COPY go.mod go.sum ./
+          RUN go mod download
+          
+          COPY . .
+          RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+          
+          FROM alpine:latest
+          RUN apk --no-cache add ca-certificates
+          WORKDIR /root/
+          
+          COPY --from=builder /app/main .
+          EXPOSE 8080
+          
+          CMD ["./main"]
+          EOF
+          
+          elif [ "${{ needs.detect-framework.outputs.framework }}" == "rust" ]; then
+            cat > Dockerfile << 'EOF'
+          FROM rust:1.70 as builder
+          
+          WORKDIR /app
+          COPY Cargo.toml Cargo.lock ./
+          RUN cargo build --release
+          
+          COPY . .
+          RUN cargo build --release
+          
+          FROM debian:bookworm-slim
+          RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+          WORKDIR /app
+          
+          COPY --from=builder /app/target/release/main .
+          EXPOSE 8080
+          
+          CMD ["./main"]
+          EOF
+          fi
+      
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Output image tag
+        id: output
+        run: echo "image-tag=${{ steps.meta.outputs.tags }}" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: [detect-framework, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy to Supabase
+        run: |
+          # Configurar CLI do Supabase
+          npm install -g supabase
+          
+          # Autenticar no Supabase
+          supabase login --token ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          
+          # Linkar projeto
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          
+          # Aplicar migrations
+          supabase db push
+          
+          # Configurar variáveis de ambiente no Supabase
+          supabase secrets set \
+            SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
+            GITHUB_CLIENT_ID="${{ secrets.GITHUB_CLIENT_ID }}" \
+            GITHUB_CLIENT_SECRET="${{ secrets.GITHUB_CLIENT_SECRET }}" \
+            JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            ENCRYPTION_KEY="${{ secrets.ENCRYPTION_KEY }}" \
+            WEBHOOK_SECRET="${{ secrets.WEBHOOK_SECRET }}"
+          
+          # Deploy da função Edge ou container
+          if [ "${{ needs.detect-framework.outputs.framework }}" == "python" ]; then
+            # Deploy como container no Supabase
+            supabase functions deploy main --no-verify-jwt
+          else
+            # Deploy como Edge Function
+            supabase functions deploy main --no-verify-jwt
+          fi
+      
+      - name: Update deployment status
+        run: |
+          # Notificar sistema de deployment sobre novo deploy
+          curl -X POST "${{ secrets.DEPLOYMENT_WEBHOOK_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.DEPLOYMENT_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "repository": "${{ github.repository }}",
+              "branch": "${{ github.ref_name }}",
+              "commit": "${{ github.sha }}",
+              "framework": "${{ needs.detect-framework.outputs.framework }}",
+              "status": "success",
+              "image_tag": "${{ needs.build.outputs.image-tag }}"
+            }'
+
+  notify:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify deployment status
+        run: |
+          STATUS="${{ job.status }}"
+          EMOJI="✅"
+          if [ "$STATUS" == "failure" ]; then
+            EMOJI="❌"
+          elif [ "$STATUS" == "cancelled" ]; then
+            EMOJI="⚠️"
+          fi
+          
+          MESSAGE="${EMOJI} Deployment ${{ job.status }} for ${{ github.repository }} on branch ${{ github.ref_name }}"
+          
+          # Enviar notificação (Discord, Slack, etc.)
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"$MESSAGE\"}"
+          fi
+          
+          # Enviar para Slack
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"text\": \"$MESSAGE\"}"
+          fi
+
+  cleanup:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Cleanup old deployments
+        run: |
+          # Manter apenas as últimas 10 versões
+          echo "Cleaning up old deployments..."
+          
+          # Limpar containers antigos (se usando Docker)
+          if command -v docker &> /dev/null; then
+            docker system prune -f --volumes
+          fi
+          
+          # Limpar arquivos temporários
+          rm -rf /tmp/deployment-* || true

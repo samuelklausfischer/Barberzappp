@@ -1,0 +1,62 @@
+<svg width="600" height="300" viewBox="0 0 600 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Central Divider -->
+  <line x1="300" y1="50" x2="300" y2="250" stroke="white" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+
+  <!-- LEFT SIDE: CAOS (ANTES) -->
+  <g id="caos">
+    <!-- Barber Stressed -->
+    <path d="M120 220V190C120 180 125 175 135 175H145" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="135" cy="155" r="12" stroke="white" stroke-width="2"/>
+    <!-- Stress Lines -->
+    <path d="M125 140L120 135M145 140L150 135" stroke="hsl(0, 62.8%, 30.6%)" stroke-width="1.5"/>
+    
+    <!-- Customer -->
+    <path d="M170 220V205C170 195 175 190 185 190H195C205 190 210 195 210 205V220" stroke="white" stroke-width="2" opacity="0.7"/>
+    <circle cx="190" cy="170" r="12" stroke="white" stroke-width="2" opacity="0.7"/>
+
+    <!-- Hand with Phone -->
+    <path d="M150 185L165 180" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <rect x="165" y="165" width="10" height="20" rx="2" transform="rotate(15 165 165)" stroke="hsl(0, 62.8%, 30.6%)" stroke-width="1.5"/>
+
+    <!-- Notifications -->
+    <g opacity="0.8">
+      <path d="M80 130C80 124 85 120 90 120H110C115 120 120 124 120 130V140L110 140L105 145L100 140H90C85 140 80 136 80 130Z" stroke="hsl(0, 62.8%, 30.6%)" stroke-width="1.5"/>
+      <circle cx="90" cy="130" r="1" fill="hsl(0, 62.8%, 30.6%)"/>
+      <circle cx="100" cy="130" r="1" fill="hsl(0, 62.8%, 30.6%)"/>
+      <circle cx="110" cy="130" r="1" fill="hsl(0, 62.8%, 30.6%)"/>
+      
+      <path d="M220 110C220 104 225 100 230 100H250C255 100 260 104 260 110V120L250 120L245 125L240 120H230C225 120 220 116 220 110Z" stroke="hsl(0, 62.8%, 30.6%)" stroke-width="1.5"/>
+      
+      <path d="M150 80C150 74 155 70 160 70H180C185 70 190 74 190 80V90L180 90L175 95L170 90H160C155 90 150 86 150 80Z" stroke="hsl(0, 62.8%, 30.6%)" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <!-- RIGHT SIDE: ORGANIZADO (DEPOIS) -->
+  <g id="organizado">
+    <!-- Barber Calm -->
+    <path d="M420 220V190C420 180 425 175 435 175H445C455 175 460 180 460 190V220" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="440" cy="155" r="12" stroke="white" stroke-width="2"/>
+    <!-- Smile -->
+    <path d="M437 160C438 162 442 162 443 160" stroke="hsl(45, 100%, 50%)" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Customer Focused -->
+    <path d="M480 220V205C480 195 485 190 495 190H505C515 190 520 195 520 205V220" stroke="white" stroke-width="2"/>
+    <circle cx="500" cy="170" r="12" stroke="white" stroke-width="2"/>
+
+    <!-- Both Hands on Job -->
+    <path d="M460 185L475 180" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M465 195L475 192" stroke="white" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Success Icon -->
+    <rect x="430" y="70" width="40" height="45" rx="4" stroke="white" stroke-width="2"/>
+    <line x1="430" y1="82" x2="470" y2="82" stroke="white" stroke-width="2"/>
+    <path d="M442 95L447 100L458 89" stroke="hsl(45, 100%, 50%)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Shine/Glow around icon -->
+    <g stroke="hsl(45, 100%, 50%)" stroke-width="1.5" stroke-linecap="round" opacity="0.6">
+      <line x1="450" y1="60" x2="450" y2="65"/>
+      <line x1="475" y1="75" x2="480" y2="72"/>
+      <line x1="425" y1="75" x2="420" y2="72"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estratégia de Rastreamento Blindado - BarberZap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        .mermaid { background: #1e293b; padding: 20px; border-radius: 12px; display: flex; justify-content: center; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .highlight { color: #fbbf24; font-weight: bold; }
+        .code-block { background: #0f172a; padding: 12px; border-radius: 8px; font-family: monospace; color: #a5b4fc; overflow-x: auto; }
+    </style>
+</head>
+<body class="p-4 md:p-8 max-w-5xl mx-auto">
+
+    <div class="text-center mb-12">
+        <span class="text-xs font-bold tracking-widest text-yellow-500 uppercase mb-2 block">Estratégia de Inteligência de Dados</span>
+        <h1 class="text-3xl md:text-5xl font-black text-white mb-4">Protocolo Pixel Blindado <span class="text-yellow-500">v2.0</span></h1>
+        <p class="text-slate-400 max-w-2xl mx-auto">Análise detalhada para garantir 100% de precisão nos dados enviados ao Meta Ads, eliminando duplicações e garantindo o rastreamento em Single Page Applications (React).</p>
+    </div>
+
+    <!-- DIAGRAMA VISUAL -->
+    <div class="card">
+        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 01-.447-.894L15 7m0 13V7m0 0L9.5 3.5" /></svg>
+            Fluxo de Dados Otimizado
+        </h2>
+        <div class="mermaid">
+            graph TD
+                A[Usuário Acessa o Site] --> B{Já Inicializou?}
+                
+                subgraph "Inicialização (index.html)"
+                B -- Não --> C[Carregar Script Base FBQ]
+                C --> D[fbq 'init', PIXEL_ID]
+                D --> E[fbq 'track', 'PageView']
+                B -- Sim --> F[Ignorar Reinicialização]
+                end
+
+                subgraph "Interações do Usuário (React)"
+                E --> G[Navegação / Scroll]
+                G --> H{Ação Valiosa?}
+                H -- Clicou WhatsApp --> I[Disparar Evento: Contact]
+                H -- Clicou Comprar --> J[Disparar Evento: InitiateCheckout]
+                H -- Viu Oferta 50% --> K[Disparar Evento: ViewContent]
+                end
+
+                subgraph "Deduplicação & Qualidade"
+                I & J & K --> L{Gerar EventID Único?}
+                L -- Sim (Futuro CAPI) --> M[Enviar Dados + EventID]
+                M --> N[Servidores Meta]
+                end
+
+                style C fill:#0f172a,stroke:#fbbf24,stroke-width:2px
+                style I fill:#064e3b,stroke:#34d399,stroke-width:2px
+                style J fill:#064e3b,stroke:#34d399,stroke-width:2px
+                style K fill:#064e3b,stroke:#34d399,stroke-width:2px
+                style N fill:#1e40af,stroke:#60a5fa,stroke-width:2px
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- O PROBLEMA ATUAL -->
+        <div class="card border-red-900/30 bg-red-950/10">
+            <h3 class="text-lg font-bold text-red-400 mb-3">🚨 O Risco Atual (SPA React)</h3>
+            <ul class="space-y-3 text-sm text-slate-300">
+                <li class="flex gap-2"><span class="text-red-500">✖</span> <b>Duplicação de PageView:</b> Em SPAs, trocar de rota ou re-renderizar componentes pode disparar o 'PageView' múltiplas vezes se estiver dentro de um `useEffect` mal configurado.</li>
+                <li class="flex gap-2"><span class="text-red-500">✖</span> <b>Perda de Referência:</b> Se o script estiver apenas no `index.html` e não houver uma "ponte" no React, perdemos o rastreamento de cliques em botões dinâmicos.</li>
+                <li class="flex gap-2"><span class="text-red-500">✖</span> <b>Dados Pobres:</b> Enviar apenas o evento sem parâmetros (ex: valor, moeda, nome do conteúdo) diminui a inteligência do algoritmo do Facebook.</li>
+            </ul>
+        </div>
+
+        <!-- A SOLUÇÃO PROPOSTA -->
+        <div class="card border-green-900/30 bg-green-950/10">
+            <h3 class="text-lg font-bold text-green-400 mb-3">✅ A Solução Blindada</h3>
+            <ul class="space-y-3 text-sm text-slate-300">
+                <li class="flex gap-2"><span class="text-green-500">✔</span> <b>Híbrido Inteligente:</b> Mantemos o script base no `index.html` para garantir carregamento ultra-rápido (First Paint), mas controlamos os eventos específicos via React.</li>
+                <li class="flex gap-2"><span class="text-green-500">✔</span> <b>Utility Wrapper:</b> Criaremos um arquivo `pixel.js` que "encapsula" o `window.fbq`. Se o Pixel não carregou (AdBlock), o site não quebra.</li>
+                <li class="flex gap-2"><span class="text-green-500">✔</span> <b>Enriquecimento de Dados:</b> Vamos adicionar `value`, `currency` e `content_name` nos eventos de conversão.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- DETALHAMENTO TÉCNICO -->
+    <div class="card">
+        <h2 class="text-xl font-bold text-white mb-6">Implementação Técnica Recomendada</h2>
+        
+        <div class="space-y-6">
+            <div>
+                <h4 class="text-yellow-500 font-bold mb-2">1. Camada de Abstração (src/utils/pixel.js)</h4>
+                <p class="text-sm text-slate-400 mb-3">Este arquivo protege o código. Ele verifica se `window.fbq` existe antes de tentar enviar dados, evitando erros "fbq is not defined".</p>
+                <div class="code-block">
+export const PIXEL_ID = '1757123869009394';
+
+export const trackEvent = (name, data = {}) => {
+  if (typeof window.fbq === 'function') {
+    window.fbq('track', name, data);
+  } else {
+    console.warn('Pixel não carregado ou bloqueado.');
+  }
+};
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-yellow-500 font-bold mb-2">2. Eventos Estratégicos</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                        <strong class="block text-white mb-1">InitiateCheckout</strong>
+                        <p class="text-slate-400">Ao clicar em "Começar Agora" ou "Assinar". Envia valor (49.90).</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                        <strong class="block text-white mb-1">Contact</strong>
+                        <p class="text-slate-400">Ao clicar em qualquer link de WhatsApp ou Suporte.</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                        <strong class="block text-white mb-1">ViewContent</strong>
+                        <p class="text-slate-400">Ao visualizar a seção de oferta/preço (Scroll Trigger).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

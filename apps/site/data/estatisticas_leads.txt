@@ -1,0 +1,24 @@
+RESUMO DE LEADS POR CIDADE
+==========================
+Uberlândia: 67
+Contagem: 67
+itajai: 66
+Itapema: 65
+Ribeirão Preto: 63
+Vila Velha: 61
+Santos: 60
+Balneário Camboriú: 58
+blumenau: 58
+Jundiaí: 56
+Florianópolis: 54
+Sorocaba: 54
+Campinas: 52
+Brasília: 50
+Goiânia: 48
+Londrina: 43
+Curitiba: 40
+São José dos Campos: 40
+Porto Alegre: 39
+São Paulo: 32
+
+Total de leads únicos com telefone válido: 948

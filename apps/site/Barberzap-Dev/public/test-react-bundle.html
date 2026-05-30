@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste React Bundle</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- React e ReactDOM via CDN (UMD - funciona sem modules) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  
+  <script>
+    // Usar as variáveis globais do React UMD
+    const { createElement } = React;
+    const { createRoot } = ReactDOM;
+    
+    console.log('=== TESTE COM REACT CDN ===');
+    console.log('React:', typeof React);
+    console.log('ReactDOM:', typeof ReactDOM);
+    console.log('createElement:', typeof createElement);
+    console.log('createRoot:', typeof createRoot);
+    
+    try {
+      const rootElement = document.getElementById('root');
+      
+      const TestComponent = () => {
+        return createElement('div', {
+          style: {
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            padding: '100px',
+            textAlign: 'center',
+            fontSize: '32px',
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }
+        }, '🎉 SUCESSO! React CDN funcionando!\n(Tela não está mais branca!)');
+      };
+      
+      const root = createRoot(rootElement);
+      root.render(createElement(TestComponent));
+      
+      console.log('Render concluída!');
+    } catch (error) {
+      console.error('Erro:', error);
+      document.body.innerHTML = '<div style="background:red;color:white;padding:50px;">ERRO: ' + error.message + '</div>';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Conversão | Barberzap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .funnel-step { clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 15% 100%); transition: all 0.3s ease; }
+        .funnel-step:hover { filter: brightness(1.1); transform: scale(1.02); }
+        .pulse-red { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <header class="bg-white rounded-2xl shadow-sm p-6 mb-8 flex flex-col md:flex-row justify-between items-center border-l-8 border-blue-600">
+            <div>
+                <h1 class="text-3xl font-800 text-gray-800 tracking-tight">Relatório de Impacto <span class="text-blue-600">Barberzap</span></h1>
+                <p class="text-gray-500 font-medium">Análise de Tráfego e Gargalos do Funil (Meta Ads)</p>
+            </div>
+            <div class="mt-4 md:mt-0 bg-blue-50 px-4 py-2 rounded-full text-blue-700 font-bold text-sm">
+                <i class="far fa-calendar-alt mr-2"></i>18 de Janeiro, 2026
+            </div>
+        </header>
+
+        <!-- KPI Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Investido</p>
+                <p class="text-2xl font-bold text-gray-800">R$ 112,00</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">CPC Médio</p>
+                <p class="text-2xl font-bold text-blue-600">R$ 0,33</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Intenção (Clicks)</p>
+                <p class="text-2xl font-bold text-orange-500">73 Pessoas</p>
+            </div>
+            <div class="bg-red-50 p-6 rounded-2xl shadow-sm border border-red-100 pulse-red">
+                <p class="text-sm font-semibold text-red-400 uppercase tracking-wider">Vendas</p>
+                <p class="text-2xl font-bold text-red-600">0 (Zero)</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Funnel Visualization -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-8 flex items-center">
+                    <i class="fas fa-filter mr-3 text-blue-500"></i>Onde os Clientes estão sumindo?
+                </h2>
+                
+                <div class="space-y-2 flex flex-col items-center">
+                    <!-- Step 1 -->
+                    <div class="funnel-step bg-blue-600 w-full h-16 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        340 Visitantes (100%)
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="funnel-step bg-blue-500 w-[85%] h-16 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                        189 Engajados (55%)
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="funnel-step bg-blue-400 w-[70%] h-16 flex items-center justify-center text-white font-bold text-lg">
+                        116 Viram Preço (34%)
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="funnel-step bg-orange-500 w-[55%] h-16 flex items-center justify-center text-white font-extrabold text-xl shadow-xl ring-4 ring-orange-200">
+                        73 NO CHECKOUT (21%)
+                    </div>
+                    <!-- Step 5 -->
+                    <div class="funnel-step bg-red-600 w-[40%] h-20 flex flex-col items-center justify-center text-white font-black text-2xl border-t-4 border-white">
+                        0 VENDAS
+                        <span class="text-xs font-normal">O BURACO ESTÁ AQUI</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                    <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                        <h3 class="font-bold text-green-700 mb-2 underline">O que está FUNCIONANDO:</h3>
+                        <ul class="space-y-2 text-green-800">
+                            <li><i class="fas fa-check mr-2"></i><strong>Anúncios:</strong> O custo por clique está excelente (R$ 0,33).</li>
+                            <li><i class="fas fa-check mr-2"></i><strong>Landing Page:</strong> A copy convenceu 1 em cada 5 pessoas a clicar para comprar.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                        <h3 class="font-bold text-red-700 mb-2 underline">O que está QUEBRADO:</h3>
+                        <ul class="space-y-2 text-red-800">
+                            <li><i class="fas fa-times mr-2"></i><strong>Preço Divergente:</strong> Site diz R$ 49,90 e Checkout diz R$ 0,99.</li>
+                            <li><i class="fas fa-times mr-2"></i><strong>Fricção:</strong> O usuário trava ao ver um valor errado.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Sidebar -->
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 uppercase text-xs tracking-widest">A Causa Mortis</h3>
+                    <div class="p-4 bg-gray-50 rounded-2xl border-2 border-dashed border-red-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-gray-400">PÁGINA</span>
+                            <span class="text-xs font-bold text-red-500">CHECKOUT</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xl font-bold text-gray-800">R$ 49,90</span>
+                            <i class="fas fa-not-equal text-red-500"></i>
+                            <span class="text-xl font-black text-red-600">R$ 0,99</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4 leading-relaxed">
+                        Quando o cliente clica em "Comprar" por 49 reais e encontra um boleto de 99 centavos, o cérebro dele detecta <strong>erro de sistema</strong> ou <strong>golpe</strong>. Ninguém coloca o cartão em algo que parece estar quebrado.
+                    </p>
+                </div>
+
+                <div class="bg-blue-600 p-6 rounded-3xl shadow-xl text-white">
+                    <h3 class="font-bold mb-4 flex items-center">
+                        <i class="fas fa-rocket mr-2"></i>Oportunidade Perdida
+                    </h3>
+                    <p class="text-blue-100 text-sm mb-4 italic">
+                        "Se o seu checkout tivesse uma conversão conservadora de 15%..."
+                    </p>
+                    <div class="text-3xl font-black mb-1">~11 Vendas</div>
+                    <div class="text-blue-200 text-sm">Faturamento Estimado: <span class="text-white font-bold">R$ 548,90</span></div>
+                    <div class="mt-4 pt-4 border-t border-blue-500">
+                        <p class="text-xs text-blue-200 uppercase font-bold">ROI Potencial</p>
+                        <p class="text-xl font-bold text-green-300">+390% de Retorno</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <footer class="mt-8 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-sm text-gray-500 mb-4 md:mb-0">
+                <i class="fas fa-info-circle mr-2"></i>Este diagnóstico indica que <strong>não é necessário mudar os anúncios</strong>, apenas o checkout.
+            </div>
+            <div class="flex space-x-3">
+                <button class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition">Ver Logs</button>
+                <button class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200">Corrigir Checkout AGORA</button>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

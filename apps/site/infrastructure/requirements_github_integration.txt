@@ -1,0 +1,38 @@
+# Dependências para integração Supabase-GitHub
+# Backend Python com FastAPI para deploy automatizado
+
+# Framework web
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Cliente Supabase
+supabase==2.0.0
+postgrest==0.10.8
+
+# Validação de dados
+pydantic==2.4.2
+
+# Utilitários
+python-dotenv==1.0.0
+httpx==0.25.0
+
+# Segurança e criptografia
+cryptography==41.0.7
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.6
+
+# Logging
+structlog==23.2.0
+
+# Para desenvolvimento
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.11.0
+flake8==6.1.0
+
+# Para produção
+gunicorn==21.2.0
+
+# Ferramentas adicionais
+aiocache==0.12.2
+redis==5.0.0

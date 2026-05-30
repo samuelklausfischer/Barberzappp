@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp",
+      "headers": {
+        "x-supabase-project-ref": "atnfpzqkhmexacafnire"
+      }
+    }
+  }
+}

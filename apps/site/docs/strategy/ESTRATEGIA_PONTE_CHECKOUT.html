@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Guerra: Ponte de Conversão | Barberzap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: #fff; }
+        .bridge-line { background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%); height: 4px; border-radius: 2px; position: relative; }
+        .node { width: 20px; height: 20px; background: #3b82f6; border: 4px solid #050505; border-radius: 50%; position: absolute; top: -8px; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
+        .success-glow { box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .danger-glow { box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); }
+    </style>
+</head>
+<body class="p-4 md:p-12">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-800 tracking-tighter italic">PONTE DE <span class="text-blue-500 font-black">CONVERSÃO</span></h1>
+                <p class="text-gray-400 mt-2">Como recuperar os 73 clientes que o Cakto está "expulsando".</p>
+            </div>
+            <div class="bg-blue-600 px-6 py-2 rounded-full font-bold text-sm uppercase tracking-widest">Ação Necessária: Imediata</div>
+        </div>
+
+        <!-- O Fluxo Atual (O Erro) -->
+        <section class="mb-16">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-red-500 mb-6"><i class="fas fa-exclamation-triangle mr-2"></i>O Fluxo que mata a venda (Atual)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div class="glass-card p-6 text-center opacity-60">
+                    <p class="text-sm font-bold">Landing Page</p>
+                    <span class="text-xs text-gray-500 italic">"Convence o cliente"</span>
+                </div>
+                <div class="flex justify-center text-red-500 text-2xl">
+                    <i class="fas fa-long-arrow-alt-right"></i>
+                </div>
+                <div class="glass-card p-6 text-center danger-glow">
+                    <p class="text-sm font-bold text-red-500 text-lg">Checkout Cakto</p>
+                    <span class="text-xs text-gray-400 italic">Confusão visual + Cadastro longo + Erro de Preço</span>
+                    <p class="mt-4 text-2xl font-black">73 Desistências</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- A Solução (A Ponte) -->
+        <section class="mb-16">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-emerald-500 mb-6"><i class="fas fa-rocket mr-2"></i>A Estratégia de Guerra (A Ponte)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+                
+                <!-- Passo 1 -->
+                <div class="glass-card p-6 text-center border-emerald-500/30">
+                    <p class="text-xs font-bold text-emerald-500 mb-2">PASSO 1</p>
+                    <p class="font-bold">Landing Page</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Botão: "Liberar Acesso Grátis"</p>
+                </div>
+
+                <div class="hidden md:flex justify-center text-blue-500"><i class="fas fa-chevron-right"></i></div>
+
+                <!-- Passo 2: O Pulo do Gato -->
+                <div class="glass-card p-8 text-center success-glow border-2 border-emerald-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-emerald-500 text-black text-[10px] px-3 font-bold py-1 uppercase">A Ponte</div>
+                    <p class="text-xs font-bold text-emerald-400 mb-2">PASSO 2: MINI-FORM</p>
+                    <p class="font-black text-lg">Captura de Lead</p>
+                    <div class="mt-3 space-y-1">
+                        <div class="h-2 w-full bg-white/10 rounded"></div>
+                        <div class="h-2 w-full bg-white/10 rounded"></div>
+                    </div>
+                    <p class="text-[10px] text-emerald-300 mt-3 font-bold">AQUI SALVAMOS O WHATSAPP</p>
+                </div>
+
+                <div class="hidden md:flex justify-center text-blue-500"><i class="fas fa-chevron-right"></i></div>
+
+                <!-- Passo 3 -->
+                <div class="glass-card p-6 text-center opacity-80">
+                    <p class="text-xs font-bold text-blue-400 mb-2">PASSO 3</p>
+                    <p class="font-bold">Checkout Cakto</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Já aquecido e "rastreado"</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Por que isso funciona? -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <div class="glass-card p-8">
+                <h3 class="font-bold text-xl mb-6 flex items-center">
+                    <i class="fas fa-magnet mr-3 text-blue-500"></i>O Micro-Compromisso
+                </h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Quando o barbeiro coloca o nome e o WhatsApp, ele cria um <strong>vínculo psicológico</strong> com o processo. Ele já investiu tempo. A chance de ele desistir no próximo passo (Cakto) diminui drasticamente porque ele já "atravessou a fronteira".
+                </p>
+            </div>
+            <div class="glass-card p-8">
+                <h3 class="font-bold text-xl mb-6 flex items-center">
+                    <i class="fas fa-undo-alt mr-3 text-emerald-500"></i>Recuperação de Vendas
+                </h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Se o cliente chegar no Cakto e desistir, <strong>VOCÊ JÁ TEM O WHATSAPP DELE</strong>. 
+                    O seu n8n pode enviar uma mensagem automática 5 minutos depois: <br>
+                    <span class="text-emerald-400 italic">"Vi que você tentou liberar seu acesso mas parou no pagamento. Ficou alguma dúvida?"</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Preview da Tela -->
+        <div class="glass-card p-10 max-w-md mx-auto border-t-4 border-blue-500">
+            <h4 class="text-center font-black text-xl mb-2">Quase lá! 🚀</h4>
+            <p class="text-center text-gray-500 text-xs mb-8">Preencha abaixo para receber o link de ativação da sua IA.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-400">Nome da Barbearia</label>
+                    <input disabled placeholder="Ex: Barber Shop Imperial" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm italic" />
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-400">Seu WhatsApp</label>
+                    <input disabled placeholder="(11) 99999-9999" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm italic" />
+                </div>
+                <button class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-blue-500/20">
+                    Ir para Pagamento Seguro
+                </button>
+            </div>
+            <p class="text-center text-[9px] text-gray-500 mt-6 uppercase tracking-widest">
+                <i class="fas fa-lock mr-1"></i> Seus dados estão seguros
+            </p>
+        </div>
+
+        <footer class="mt-20 text-center space-y-4">
+            <p class="text-xs text-gray-600 uppercase tracking-[0.3em]">Conclusão Técnica</p>
+            <p class="text-gray-400 max-w-xl mx-auto text-sm italic">
+                "Não adianta jogar tráfego em um balde furado. A ponte de conversão tapa o buraco e garante que cada centavo do seu anúncio vire, no mínimo, um contato valioso."
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

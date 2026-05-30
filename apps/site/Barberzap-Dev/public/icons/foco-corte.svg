@@ -1,0 +1,18 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Customer (simplified profile) -->
+  <path d="M40 70C40 60 45 55 55 55H60C65 55 70 60 70 70V80H40V70Z" stroke="white" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="57.5" cy="45" r="10" stroke="white" stroke-width="2.6"/>
+  
+  <!-- Barber (simplified profile, leaning in) -->
+  <path d="M20 80V65C20 60 25 55 30 55H35" stroke="white" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="30" cy="45" r="8" stroke="white" stroke-width="2.6"/>
+  <path d="M35 50L45 45" stroke="white" stroke-width="2.6" stroke-linecap="round"/> <!-- Hand/Tool -->
+
+  <!-- Halo/Glow -->
+  <path d="M20 30C25 25 35 25 40 30" stroke="hsl(45, 100%, 50%)" stroke-width="2.6" stroke-linecap="round">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" />
+  </path>
+  <path d="M25 22L27 20M35 22L33 20" stroke="hsl(45, 100%, 50%)" stroke-width="2" stroke-linecap="round">
+    <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" />
+  </path>
+</svg>

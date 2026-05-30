@@ -1,0 +1,33 @@
+<svg width="300" height="300" viewBox="300 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left edge divider -->
+  <line x1="300" y1="50" x2="300" y2="250" stroke="white" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+
+  <!-- RIGHT SIDE: ORGANIZADO (DEPOIS) -->
+  <g id="organizado">
+    <!-- Barber Calm -->
+    <path d="M420 220V190C420 180 425 175 435 175H445C455 175 460 180 460 190V220" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="440" cy="155" r="12" stroke="white" stroke-width="2"/>
+    <!-- Smile -->
+    <path d="M437 160C438 162 442 162 443 160" stroke="hsl(45, 100%, 50%)" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Customer Focused -->
+    <path d="M480 220V205C480 195 485 190 495 190H505C515 190 520 195 520 205V220" stroke="white" stroke-width="2"/>
+    <circle cx="500" cy="170" r="12" stroke="white" stroke-width="2"/>
+
+    <!-- Both Hands on Job -->
+    <path d="M460 185L475 180" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M465 195L475 192" stroke="white" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Success Icon -->
+    <rect x="430" y="70" width="40" height="45" rx="4" stroke="white" stroke-width="2"/>
+    <line x1="430" y1="82" x2="470" y2="82" stroke="white" stroke-width="2"/>
+    <path d="M442 95L447 100L458 89" stroke="hsl(45, 100%, 50%)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Shine/Glow around icon -->
+    <g stroke="hsl(45, 100%, 50%)" stroke-width="1.5" stroke-linecap="round" opacity="0.6">
+      <line x1="450" y1="60" x2="450" y2="65"/>
+      <line x1="475" y1="75" x2="480" y2="72"/>
+      <line x1="425" y1="75" x2="420" y2="72"/>
+    </g>
+  </g>
+</svg>
