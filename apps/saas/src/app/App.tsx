@@ -4,10 +4,48 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layout/Sidebar';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import Login from '@/components/auth/Login';
+import TrialCountdown from '@/components/billing/TrialCountdown';
 import { LoadingSkeleton } from '@/components/ui/Skeleton';
 import { StatusBadge } from '@/components/ui/Premium';
+import { supabaseConfigError } from '@/infrastructure/supabase/client';
 
-const AppLayout: React.FC = () => {
+const SupabaseConfigNotice: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-[#090807] px-5 py-8 text-[#f6f1e8]">
+      <div className="mx-auto flex min-h-[80vh] w-full max-w-3xl items-center justify-center">
+        <div className="bz-panel bz-gold-ring w-full rounded-[30px] p-8 sm:p-10">
+          <p className="bz-kicker mb-3">Supabase config missing</p>
+          <h1 className="bz-title-serif text-4xl leading-tight text-white sm:text-5xl">
+            The app cannot start without the public Supabase key.
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-[#c8bdab]">
+            Create <code className="rounded bg-white/5 px-1.5 py-0.5 text-[#f0d57e]">apps/saas/.env.local</code> and
+            add <code className="rounded bg-white/5 px-1.5 py-0.5 text-[#f0d57e]">VITE_SUPABASE_ANON_KEY</code> with
+            the public key from Supabase Dashboard &gt; Project Settings &gt; API.
+          </p>
+          <div className="mt-6 rounded-2xl border border-white/8 bg-white/[0.03] p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#8d8373]">Fast fix</p>
+            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-[#d8cdbd]">
+              <li>Copy <code className="text-[#f0d57e]">apps/saas/.env.example</code> to <code className="text-[#f0d57e]">.env.local</code>.</li>
+              <li>Replace the placeholder key with the real public Supabase key.</li>
+              <li>Restart <code className="text-[#f0d57e]">npm run dev</code>.</li>
+            </ol>
+          </div>
+          <p className="mt-4 text-xs text-[#8d8373]">
+            Project ref: <code className="rounded bg-white/5 px-1.5 py-0.5 text-[#f0d57e]">ogftqqlvduobgtqbvvpf</code>
+          </p>
+          {supabaseConfigError && (
+            <p className="mt-4 rounded-2xl border border-[#c97878]/25 bg-[#c97878]/10 px-4 py-3 text-sm text-[#f2c0c0]">
+              {supabaseConfigError}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AppLayoutContent: React.FC = () => {
   const { user, profile, tenant, membership, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -51,6 +89,8 @@ const AppLayout: React.FC = () => {
 
               <StatusBadge label={tenant?.company_name || 'Loja ativa'} tone="emerald" />
 
+              <TrialCountdown subscriptionStatus={tenant?.subscription_status} trialEndsAt={tenant?.trial_ends_at} />
+
               <button className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-[#d8cdbd] transition-colors hover:text-white">
                 <span className="material-symbols-outlined">notifications</span>
                 <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[#d7ab3f]" />
@@ -77,6 +117,14 @@ const AppLayout: React.FC = () => {
       </main>
     </div>
   );
+};
+
+const AppLayout: React.FC = () => {
+  if (supabaseConfigError) {
+    return <SupabaseConfigNotice />;
+  }
+
+  return <AppLayoutContent />;
 };
 
 export default AppLayout;

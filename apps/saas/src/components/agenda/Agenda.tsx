@@ -3,10 +3,10 @@ import React from 'react';
 import { Appointment } from '@/domain/types';
 
 interface AgendaProps {
-  appointments: Appointment[];
+  appointments?: Appointment[];
 }
 
-const Agenda: React.FC<AgendaProps> = ({ appointments }) => {
+const Agenda: React.FC<AgendaProps> = ({ appointments = [] }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-left duration-500 pb-20">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">

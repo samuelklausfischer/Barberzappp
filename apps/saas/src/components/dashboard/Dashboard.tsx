@@ -1,13 +1,45 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Appointment, AppView } from '@/domain/types';
+import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats';
 
 interface DashboardProps {
-  appointments: Appointment[];
-  onNavigate: (view: AppView) => void;
+  appointments?: Appointment[];
+  onNavigate?: (view: AppView) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
+const routeByView: Partial<Record<AppView, string>> = {
+  dashboard: '/',
+  agenda: '/agenda',
+  finance: '/finance',
+  whatsapp: '/whatsapp',
+  settings: '/settings',
+  services: '/services',
+  aiconfig: '/aiconfig',
+};
+
+const Dashboard: React.FC<DashboardProps> = ({ appointments = [], onNavigate }) => {
+  const navigate = useNavigate();
+  const { cutsToday, estimatedRevenue, nextAppointments, loading, error } = useDashboardStats();
+  const displayedAppointments = nextAppointments.length > 0 ? nextAppointments : appointments.slice(0, 3);
+  const revenueLabel = estimatedRevenue.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+
+  const handleNavigate = (view: AppView) => {
+    if (onNavigate) {
+      onNavigate(view);
+      return;
+    }
+
+    const route = routeByView[view];
+    if (route) {
+      navigate(route);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -27,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
             </div>
           </div>
           <button 
-            onClick={() => onNavigate('whatsapp')}
+            onClick={() => handleNavigate('whatsapp')}
             className="px-6 py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg shadow-red-950/40 transition-all active:scale-95 whitespace-nowrap z-10"
           >
             Reconectar WhatsApp
@@ -38,7 +70,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
           <div className="flex justify-between items-start mb-6">
             <div>
               <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Cortes Hoje</p>
-              <h4 className="text-4xl font-bold">8</h4>
+              <h4 className="text-4xl font-bold">{loading ? '...' : cutsToday}</h4>
             </div>
             <div className="p-2 bg-[#f4c025]/10 text-[#f4c025] rounded-lg">
               <span className="material-symbols-outlined">content_cut</span>
@@ -47,12 +79,17 @@ const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
           <div className="flex justify-between items-end">
             <div>
               <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Faturamento Est.</p>
-              <h4 className="text-2xl font-bold text-[#f4c025]">R$ 240,00</h4>
+              <h4 className="text-2xl font-bold text-[#f4c025]">{loading ? '...' : revenueLabel}</h4>
             </div>
             <div className="p-2 bg-green-500/10 text-green-500 rounded-lg">
               <span className="material-symbols-outlined">payments</span>
             </div>
           </div>
+          {error && (
+            <p className="mt-4 text-xs text-red-400">
+              Nao foi possivel carregar os dados do dashboard.
+            </p>
+          )}
         </div>
       </div>
 
@@ -68,13 +105,13 @@ const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
             </div>
             <span className="font-bold text-sm">Novo Agendamento</span>
           </button>
-          <button onClick={() => onNavigate('services')} className="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-white/5 bg-zinc-950 hover:bg-zinc-900 transition-all group">
+          <button onClick={() => handleNavigate('services')} className="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-white/5 bg-zinc-950 hover:bg-zinc-900 transition-all group">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span className="material-symbols-outlined text-3xl">cut</span>
             </div>
             <span className="font-bold text-sm">Serviços</span>
           </button>
-          <button onClick={() => onNavigate('agenda')} className="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-white/5 bg-zinc-950 hover:bg-zinc-900 transition-all group">
+          <button onClick={() => handleNavigate('agenda')} className="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-white/5 bg-zinc-950 hover:bg-zinc-900 transition-all group">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span className="material-symbols-outlined text-3xl">calendar_today</span>
             </div>
@@ -92,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
       <section>
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-bold">Próximos Agendamentos</h3>
-          <button onClick={() => onNavigate('agenda')} className="text-[#f4c025] text-sm font-bold hover:underline">Ver todos</button>
+          <button onClick={() => handleNavigate('agenda')} className="text-[#f4c025] text-sm font-bold hover:underline">Ver todos</button>
         </div>
         <div className="bg-zinc-900 rounded-2xl border border-white/10 overflow-hidden">
           <table className="w-full text-left">
@@ -104,7 +141,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {appointments.slice(0, 3).map((apt) => (
+              {displayedAppointments.map((apt) => (
                 <tr key={apt.id} className="hover:bg-white/[0.02] transition-colors group">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
@@ -123,6 +160,13 @@ const Dashboard: React.FC<DashboardProps> = ({ appointments, onNavigate }) => {
                   </td>
                 </tr>
               ))}
+              {!loading && displayedAppointments.length === 0 && (
+                <tr>
+                  <td className="px-8 py-8 text-sm text-zinc-500 text-center" colSpan={3}>
+                    Nenhum agendamento encontrado para hoje nesta conta.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

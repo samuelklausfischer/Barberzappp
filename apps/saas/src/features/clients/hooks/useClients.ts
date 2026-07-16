@@ -2,31 +2,35 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase, Client } from '@/infrastructure/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
+type ClientFormData = Pick<Client, 'name' | 'phone' | 'email' | 'avatar_url'>;
+
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { tenant } = useAuth();
 
   const fetchClients = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      if (!user?.id) {
+
+      if (!tenant?.id) {
         setClients([]);
-        setLoading(false);
         return;
       }
 
       const { data, error: fetchError } = await supabase
         .from('clients')
         .select('*')
-        .eq('barber_id', user.id)
+        .eq('tenant_id', tenant.id)
+        .is('deleted_at', null)
         .order('name', { ascending: true });
 
-      if (fetchError) throw fetchError;
-      
+      if (fetchError) {
+        throw fetchError;
+      }
+
       setClients(data || []);
     } catch (err) {
       console.error('Erro ao buscar clientes:', err);
@@ -34,33 +38,38 @@ export const useClients = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [tenant?.id]);
 
-  const createClient = useCallback(async (client: Omit<Client, 'id'>) => {
+  const createClient = useCallback(async (client: ClientFormData) => {
     try {
       setError(null);
 
-      if (!user?.id) {
-        throw new Error('Usuário não autenticado');
+      if (!tenant?.id) {
+        throw new Error('Conta nao encontrada para criar cliente');
       }
 
-      const clientWithOwner = {
+      const clientPayload = {
         ...client,
-        barber_id: client.barber_id || user.id,
+        tenant_id: tenant.id,
+        shop_id: tenant.id,
+        user_id: tenant.id,
+        phone_number: client.phone,
       };
-       
+
       const { data, error: insertError } = await supabase
         .from('clients')
-        .insert(clientWithOwner)
+        .insert(clientPayload)
         .select()
         .single();
 
-      if (insertError) throw insertError;
-      
-      if (data) {
-        setClients(prev => [...prev, data]);
+      if (insertError) {
+        throw insertError;
       }
-      
+
+      if (data) {
+        setClients((prev) => [...prev, data].sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+      }
+
       return data;
     } catch (err) {
       console.error('Erro ao criar cliente:', err);
@@ -68,25 +77,37 @@ export const useClients = () => {
       setError(errorMessage);
       throw new Error(errorMessage);
     }
-  }, [user?.id]);
+  }, [tenant?.id]);
 
-  const updateClient = useCallback(async (id: string, updates: Partial<Client>) => {
+  const updateClient = useCallback(async (id: Client['id'], updates: Partial<Client>) => {
     try {
       setError(null);
-      
+
+      if (!tenant?.id) {
+        throw new Error('Conta nao encontrada para atualizar cliente');
+      }
+
+      const normalizedUpdates = {
+        ...updates,
+        phone_number: updates.phone ?? updates.phone_number,
+      };
+
       const { data, error: updateError } = await supabase
         .from('clients')
-        .update(updates)
+        .update(normalizedUpdates)
         .eq('id', id)
+        .eq('tenant_id', tenant.id)
         .select()
         .single();
 
-      if (updateError) throw updateError;
-      
-      if (data) {
-        setClients(prev => prev.map(c => c.id === id ? data : c));
+      if (updateError) {
+        throw updateError;
       }
-      
+
+      if (data) {
+        setClients((prev) => prev.map((client) => (client.id === id ? data : client)));
+      }
+
       return data;
     } catch (err) {
       console.error('Erro ao atualizar cliente:', err);
@@ -94,44 +115,54 @@ export const useClients = () => {
       setError(errorMessage);
       throw new Error(errorMessage);
     }
-  }, []);
+  }, [tenant?.id]);
 
-  const deleteClient = useCallback(async (id: string) => {
+  const deleteClient = useCallback(async (id: Client['id']) => {
     try {
       setError(null);
-      
+
+      if (!tenant?.id) {
+        throw new Error('Conta nao encontrada para excluir cliente');
+      }
+
       const { error: deleteError } = await supabase
         .from('clients')
-        .delete()
-        .eq('id', id);
+        .update({ deleted_at: new Date().toISOString(), status: 'deleted' })
+        .eq('id', id)
+        .eq('tenant_id', tenant.id);
 
-      if (deleteError) throw deleteError;
-      
-      setClients(prev => prev.filter(c => c.id !== id));
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      setClients((prev) => prev.filter((client) => client.id !== id));
     } catch (err) {
       console.error('Erro ao excluir cliente:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir cliente';
       setError(errorMessage);
       throw new Error(errorMessage);
     }
-  }, []);
+  }, [tenant?.id]);
 
   const searchByPhone = useCallback(async (phone: string) => {
     try {
       setError(null);
 
-      if (!user?.id) {
+      if (!tenant?.id) {
         return [];
       }
-       
+
       const { data, error: searchError } = await supabase
         .from('clients')
         .select('*')
-        .ilike('phone', `%${phone}%`)
-        .eq('barber_id', user.id);
+        .or(`phone.ilike.%${phone}%,phone_number.ilike.%${phone}%`)
+        .eq('tenant_id', tenant.id)
+        .is('deleted_at', null);
 
-      if (searchError) throw searchError;
-      
+      if (searchError) {
+        throw searchError;
+      }
+
       return data || [];
     } catch (err) {
       console.error('Erro ao buscar por telefone:', err);
@@ -139,7 +170,7 @@ export const useClients = () => {
       setError(errorMessage);
       throw new Error(errorMessage);
     }
-  }, [user?.id]);
+  }, [tenant?.id]);
 
   useEffect(() => {
     fetchClients();

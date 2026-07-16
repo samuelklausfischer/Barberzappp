@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { useClients } from '@/features/clients/hooks/useClients';
 import { Modal } from '@/components/ui/Modal';
 import { ErrorState, LoadingSkeleton } from '@/components/ui/Skeleton';
-import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { Client } from '@/infrastructure/supabase/client';
 import { EmptyPremium, PageHeader, Panel, SectionTitle, StatusBadge } from '@/components/ui/Premium';
 
 const ClientsList: React.FC = () => {
   const { clients, loading, error, refresh, createClient, updateClient, deleteClient } = useClients();
-  const { user } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -48,7 +46,6 @@ const ClientsList: React.FC = () => {
         phone: formData.phone,
         email: formData.email || null,
         avatar_url: formData.avatar_url || null,
-        barber_id: user?.id,
       };
 
       if (editingClient) {
@@ -66,7 +63,7 @@ const ClientsList: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: Client['id']) => {
     if (window.confirm('Tem certeza que deseja excluir este cliente?')) {
       await deleteClient(id);
     }

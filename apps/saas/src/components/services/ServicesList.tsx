@@ -3,10 +3,10 @@ import React from 'react';
 import { Service } from '@/domain/types';
 
 interface ServicesListProps {
-  services: Service[];
+  services?: Service[];
 }
 
-const ServicesList: React.FC<ServicesListProps> = ({ services }) => {
+const ServicesList: React.FC<ServicesListProps> = ({ services = [] }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">

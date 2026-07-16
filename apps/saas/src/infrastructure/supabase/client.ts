@@ -1,14 +1,97 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://htssqiupscyhhueqwpgu.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const DEFAULT_SUPABASE_URL = 'https://ogftqqlvduobgtqbvvpf.supabase.co';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+const readEnv = (value: string | undefined) => value?.trim() ?? '';
+
+export const supabaseUrl = readEnv(import.meta.env.VITE_SUPABASE_URL) || DEFAULT_SUPABASE_URL;
+export const supabaseAnonKey =
+  readEnv(import.meta.env.VITE_SUPABASE_ANON_KEY) ||
+  readEnv(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+
+export const supabaseConfigError = supabaseAnonKey
+  ? null
+  : 'Missing VITE_SUPABASE_ANON_KEY. Create apps/saas/.env.local with the public Supabase key from Project Settings > API.';
+
+const createFailingQueryBuilder = (reason: string): any => {
+  const rejected = Promise.reject(new Error(reason));
+  rejected.catch(() => {});
+
+  const builder: any = new Proxy(() => {}, {
+    apply() {
+      return builder;
+    },
+    get(_target, prop) {
+      if (prop === 'then') return rejected.then.bind(rejected);
+      if (prop === 'catch') return rejected.catch.bind(rejected);
+      if (prop === 'finally') return rejected.finally.bind(rejected);
+      return (..._args: unknown[]) => builder;
+    },
+  });
+
+  return builder;
+};
+
+const createMissingSupabaseClient = (reason: string): ReturnType<typeof createClient> => {
+  const failingQuery = createFailingQueryBuilder(reason);
+
+  return {
+    auth: {
+      getSession: async () => {
+        throw new Error(reason);
+      },
+      getUser: async () => {
+        throw new Error(reason);
+      },
+      signInWithPassword: async () => {
+        throw new Error(reason);
+      },
+      signOut: async () => {
+        throw new Error(reason);
+      },
+      refreshSession: async () => {
+        throw new Error(reason);
+      },
+      onAuthStateChange: () => ({
+        data: {
+          subscription: {
+            unsubscribe: () => {},
+          },
+        },
+      }),
+    },
+    from: () => failingQuery,
+    rpc: () => failingQuery,
+    storage: {
+      from: () => failingQuery,
+    },
+    channel: () => ({
+      on: () => failingQuery,
+      subscribe: () => ({
+        unsubscribe: () => {},
+      }),
+      unsubscribe: async () => {},
+      track: async () => ({ status: 'ok' as const }),
+      send: async () => ({ status: 'ok' as const }),
+    }),
+    removeChannel: async () => null,
+    removeAllChannels: async () => [],
+    functions: {
+      invoke: async () => {
+        throw new Error(reason);
+      },
+    },
+  } as unknown as ReturnType<typeof createClient>;
+};
+
+export const supabase = supabaseConfigError
+  ? createMissingSupabaseClient(supabaseConfigError)
+  : createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
 
 export type Database = {
   public: {
@@ -103,28 +186,61 @@ export type Database = {
       };
       clients: {
         Row: {
-          id: string;
-          barber_id: string | null;
+          id: number;
+          tenant_id: string;
+          shop_id: string;
+          user_id: string;
+          barber_id: number | null;
           name: string | null;
           phone: string | null;
+          phone_number: string | null;
           avatar_url: string | null;
           email: string | null;
+          notes: string | null;
+          status: string;
+          total_visits: number;
+          last_visit_at: string | null;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
-          id?: string;
-          barber_id?: string | null;
+          id?: number;
+          tenant_id: string;
+          shop_id: string;
+          user_id: string;
+          barber_id?: number | null;
           name?: string | null;
           phone?: string | null;
+          phone_number?: string | null;
           avatar_url?: string | null;
           email?: string | null;
+          notes?: string | null;
+          status?: string;
+          total_visits?: number;
+          last_visit_at?: string | null;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Update: {
-          id?: string;
-          barber_id?: string | null;
+          id?: number;
+          tenant_id?: string;
+          shop_id?: string;
+          user_id?: string;
+          barber_id?: number | null;
           name?: string | null;
           phone?: string | null;
+          phone_number?: string | null;
           avatar_url?: string | null;
           email?: string | null;
+          notes?: string | null;
+          status?: string;
+          total_visits?: number;
+          last_visit_at?: string | null;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
       };
       barbers: {
@@ -164,6 +280,8 @@ export type Database = {
           owner_phone: string | null;
           subscription_status: string | null;
           subscription_id: string | null;
+          trial_started_at: string | null;
+          trial_ends_at: string | null;
           created_at: string | null;
           is_active: boolean | null;
           owner_email: string | null;
@@ -179,6 +297,8 @@ export type Database = {
           owner_phone?: string | null;
           subscription_status?: string | null;
           subscription_id?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
           created_at?: string | null;
           is_active?: boolean | null;
           owner_email?: string | null;
@@ -194,6 +314,8 @@ export type Database = {
           owner_phone?: string | null;
           subscription_status?: string | null;
           subscription_id?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
           created_at?: string | null;
           is_active?: boolean | null;
           owner_email?: string | null;
@@ -214,6 +336,8 @@ export type Database = {
           business_address: string | null;
           business_hours: string | null;
           subscription_status: string | null;
+          trial_started_at: string | null;
+          trial_ends_at: string | null;
         };
         Insert: {
           id: string;
@@ -225,6 +349,8 @@ export type Database = {
           business_address?: string | null;
           business_hours?: string | null;
           subscription_status?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
         };
         Update: {
           id?: string;
@@ -236,6 +362,8 @@ export type Database = {
           business_address?: string | null;
           business_hours?: string | null;
           subscription_status?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
         };
       };
       crm_leads: {
