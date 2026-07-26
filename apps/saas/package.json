@@ -12,6 +12,7 @@
     "build:vercel": "node scripts/validate-vercel-env.mjs && npm run typecheck:app && npm run build",
     "typecheck:app": "tsc -p tsconfig.app.json",
     "test:agenda": "node --test --test-isolation=none --experimental-strip-types tests/unit/agendaDateRange.test.ts tests/unit/agendaTimeline.test.ts",
+    "test:services": "node --test --test-isolation=none --experimental-strip-types tests/unit/serviceDraft.test.ts",
     "preview": "vite preview",
     "test:load:setup": "k6 run tests/load/setup.js",
     "test:load:cleanup": "k6 run --env DRY_RUN=false tests/load/cleanup.js",
