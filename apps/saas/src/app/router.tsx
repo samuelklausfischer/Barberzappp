@@ -12,6 +12,7 @@ import TrialRegistration from '@/components/auth/TrialRegistration';
 import { RoleGuard } from '@/components/auth/RoleGuard';
 import PublicOnlyRoute from '@/components/auth/PublicOnlyRoute';
 import GeneralSettings from '@/components/settings/GeneralSettings';
+import TeamSettings from '@/components/settings/TeamSettings';
 import { APP_PATHS } from '@/config/routes';
 
 export const router = createBrowserRouter([
@@ -64,6 +65,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleGuard allowedRoles={['owner']}>
             <GeneralSettings />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: `${APP_PATHS.SETTINGS}/team`,
+        element: (
+          <RoleGuard allowedRoles={['owner']}>
+            <TeamSettings />
           </RoleGuard>
         ),
       },

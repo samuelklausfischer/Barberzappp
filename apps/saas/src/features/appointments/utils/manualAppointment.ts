@@ -8,15 +8,94 @@ export type ManualAppointmentService = {
   barberId?: string | null;
 };
 
+export type WorkingHoursInterval = {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  isActive: boolean;
+  timezone?: string | null;
+};
+
+const TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+const DATABASE_TIME_PATTERN = /^((?:[01]\d|2[0-3]):[0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/;
+
+export const normalizeWorkingHoursTime = (value: string) =>
+  DATABASE_TIME_PATTERN.exec(value)?.[1] ?? null;
+
+export const isWorkingHoursRowActive = (value: boolean | null) => value === true;
+
+const toMinutes = (time: string) => {
+  if (!TIME_PATTERN.test(time)) return null;
+  const [hour, minute] = time.split(':').map(Number);
+  return hour * 60 + minute;
+};
+
+export const isValidWorkingHoursInterval = (interval: WorkingHoursInterval) => {
+  const start = toMinutes(interval.startTime);
+  const end = toMinutes(interval.endTime);
+  return (
+    interval.isActive &&
+    Number.isInteger(interval.dayOfWeek) &&
+    interval.dayOfWeek >= 0 &&
+    interval.dayOfWeek <= 6 &&
+    start !== null &&
+    end !== null &&
+    start < end
+  );
+};
+
+const getCalendarDayOfWeek = (date: string) => {
+  getAgendaDateTime(date, '00:00');
+  return new Date(`${date}T00:00:00.000Z`).getUTCDay();
+};
+
+export const getValidWorkingHoursForDate = (date: string, workingHours: WorkingHoursInterval[]) => {
+  const dayOfWeek = getCalendarDayOfWeek(date);
+  return workingHours
+    .filter((interval) => isValidWorkingHoursInterval(interval) && interval.dayOfWeek === dayOfWeek)
+    .sort((left, right) => left.startTime.localeCompare(right.startTime));
+};
+
+export const getWorkingHoursLabelForDate = (date: string, workingHours: WorkingHoursInterval[]) => {
+  const intervals = getValidWorkingHoursForDate(date, workingHours);
+  return intervals.length
+    ? intervals.map((interval) => `${interval.startTime}–${interval.endTime}`).join(' · ')
+    : 'Não atende nesta data';
+};
+
+export const isManualAppointmentWithinWorkingHours = ({
+  date,
+  time,
+  durationMinutes,
+  workingHours,
+}: {
+  date: string;
+  time: string;
+  durationMinutes: number;
+  workingHours: WorkingHoursInterval[];
+}) => {
+  const start = toMinutes(time);
+  if (start === null || !Number.isFinite(durationMinutes) || durationMinutes <= 0) return false;
+  const end = start + durationMinutes;
+  return getValidWorkingHoursForDate(date, workingHours).some((interval) => {
+    const intervalStart = toMinutes(interval.startTime);
+    const intervalEnd = toMinutes(interval.endTime);
+    return (
+      intervalStart !== null && intervalEnd !== null && start >= intervalStart && end <= intervalEnd
+    );
+  });
+};
+
 export const getServiceDurationMinutes = (
   durationMinutes: number | null,
   duration: number | null
 ) => {
-  const selected = durationMinutes !== null && durationMinutes !== 0
-    ? durationMinutes
-    : duration !== null && duration !== 0
-      ? duration
-      : null;
+  const selected =
+    durationMinutes !== null && durationMinutes !== 0
+      ? durationMinutes
+      : duration !== null && duration !== 0
+        ? duration
+        : null;
   return selected !== null && selected > 0 ? selected : null;
 };
 

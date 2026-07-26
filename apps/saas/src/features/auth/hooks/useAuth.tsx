@@ -26,6 +26,7 @@ interface Tenant {
   is_active: boolean | null;
   trial_started_at: string | null;
   trial_ends_at: string | null;
+  timezone: string | null;
 }
 interface TenantMembership {
   id: string;
@@ -100,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       supabase
         .from('tenant_memberships')
         .select(
-          'id, tenant_id, role, status, created_at, updated_at, tenants ( id, company_name, owner_phone, email, subscription_status, is_active, trial_started_at, trial_ends_at )'
+          'id, tenant_id, role, status, created_at, updated_at, tenants ( id, company_name, owner_phone, email, subscription_status, is_active, trial_started_at, trial_ends_at, timezone )'
         )
         .eq('user_id', currentSession.user.id)
         .eq('status', 'active')

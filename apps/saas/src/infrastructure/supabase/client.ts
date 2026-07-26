@@ -180,6 +180,7 @@ export type Database = {
           whatsapp_status: string | null;
           trial_started_at: string | null;
           trial_ends_at: string | null;
+          timezone: string | null;
         };
         Insert: {
           id?: string;
@@ -197,6 +198,7 @@ export type Database = {
           whatsapp_status?: string | null;
           trial_started_at?: string | null;
           trial_ends_at?: string | null;
+          timezone?: string | null;
         };
         Update: {
           id?: string;
@@ -214,6 +216,7 @@ export type Database = {
           whatsapp_status?: string | null;
           trial_started_at?: string | null;
           trial_ends_at?: string | null;
+          timezone?: string | null;
         };
       };
       profiles: {

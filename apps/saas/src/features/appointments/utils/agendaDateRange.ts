@@ -1,4 +1,6 @@
-export const DEFAULT_AGENDA_TIME_ZONE = 'America/Sao_Paulo';
+import { DEFAULT_AGENDA_TIME_ZONE } from '../../../config/timeZone.ts';
+
+export { DEFAULT_AGENDA_TIME_ZONE, resolveAgendaTimeZone } from '../../../config/timeZone.ts';
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -54,9 +56,7 @@ const parseCalendarDate = (date: string) => {
 const getDateParts = (instant: Date, timeZone: string): DateParts => {
   const parts = getFormatter(timeZone).formatToParts(instant);
   const values = Object.fromEntries(
-    parts
-      .filter(({ type }) => type !== 'literal')
-      .map(({ type, value }) => [type, Number(value)])
+    parts.filter(({ type }) => type !== 'literal').map(({ type, value }) => [type, Number(value)])
   ) as Record<string, number>;
 
   return {
@@ -120,7 +120,8 @@ export const getAgendaDateTime = (
   }
 
   const [hour, minute] = time.split(':').map(Number);
-  if (hour > 23 || minute > 59) throw new Error('O hor\u00e1rio da agenda n\u00e3o \u00e9 v\u00e1lido.');
+  if (hour > 23 || minute > 59)
+    throw new Error('O hor\u00e1rio da agenda n\u00e3o \u00e9 v\u00e1lido.');
 
   const startOfDay = new Date(getAgendaDayRange(date, timeZone).startsAt);
   return new Date(startOfDay.getTime() + (hour * 60 + minute) * 60_000).toISOString();
