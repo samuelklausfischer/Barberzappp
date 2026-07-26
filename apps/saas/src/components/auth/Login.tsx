@@ -1,6 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import BarberZapLogo from '@/components/ui/BarberZapLogo';
+
+const benefits = [
+  {
+    icon: 'calendar_month',
+    title: 'Agenda sob controle',
+    description: 'Visualize o dia e mantenha a rotina da equipe organizada.',
+  },
+  {
+    icon: 'groups',
+    title: 'Clientes por perto',
+    description: 'Centralize relacionamentos e acompanhe cada atendimento.',
+  },
+  {
+    icon: 'monitoring',
+    title: 'Decisões mais claras',
+    description: 'Acompanhe a operação em um painel feito para a barbearia.',
+  },
+];
+
+const SoonBadge: React.FC = () => (
+  <span className="rounded-full border border-[#b8861d]/25 bg-[#d7ab3f]/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[#8a6414]">
+    Em breve
+  </span>
+);
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -10,141 +35,231 @@ const Login: React.FC = () => {
   const [localError, setLocalError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLocalError(null);
-    
+
     try {
       await signIn(email, password);
       navigate('/', { replace: true });
-    } catch (err) {
-      setLocalError(err instanceof Error ? err.message : 'Erro ao fazer login');
+    } catch (loginError) {
+      setLocalError(loginError instanceof Error ? loginError.message : 'Erro ao fazer login');
     }
   };
 
   const displayError = localError || error;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#090807] px-5 py-8 text-[#f6f1e8] sm:px-6 sm:py-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(215,171,63,0.15),transparent_30%),linear-gradient(180deg,#0c0b0a_0%,#090807_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bz-grid-lines opacity-20" />
+    <main className="bz-login-page relative isolate min-h-[100dvh] overflow-x-hidden text-[#211b14]">
+      <div className="bz-login-orb bz-login-orb-top" aria-hidden="true" />
+      <div className="bz-login-orb bz-login-orb-bottom" aria-hidden="true" />
 
-      <div className="relative z-10 w-full max-w-[540px]">
-        <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[#d7ab3f]/30 bg-black/30 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
-            <span className="material-symbols-outlined text-4xl text-[#f0d57e]">content_cut</span>
-          </div>
-          <div>
-            <p className="bz-title-serif text-4xl leading-none text-[#f0d57e] sm:text-5xl">BarberZap</p>
-            <p className="mt-2 text-xs uppercase tracking-[0.34em] text-[#9a8f7d]">The Digital Concierge Experience</p>
-          </div>
-        </div>
-
-        <div className="bz-panel bz-gold-ring rounded-[30px] px-5 py-6 sm:px-10 sm:py-8">
-          <div className="mb-8 text-center">
-            <h2 className="bz-title-serif text-3xl leading-none text-white sm:text-4xl">Bem-vindo de volta</h2>
-            <p className="mt-3 text-sm text-[#c8bdab] sm:text-base">Acesse sua operação premium com clareza, elegância e controle.</p>
+      <div className="relative z-10 mx-auto grid min-h-[100dvh] w-full max-w-[1600px] lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
+        <section className="bz-login-story hidden min-h-[100dvh] flex-col justify-between border-r border-[#2f281f]/[0.08] px-10 py-10 lg:flex xl:px-16 xl:py-12 2xl:px-20">
+          <div className="bz-login-reveal">
+            <BarberZapLogo label="BarberZap" showTagline tone="light" />
           </div>
 
-          {displayError && (
-            <div className="mb-6 rounded-2xl border border-[#c97878]/30 bg-[#c97878]/10 px-4 py-4 text-left">
-              <p className="text-sm font-medium text-[#f2c0c0]">{displayError}</p>
-            </div>
-          )}
+          <div className="bz-login-reveal bz-login-reveal-delay my-12 max-w-[720px]">
+            <p className="bz-kicker mb-5 text-[#956a16]">Seu negócio, mais simples</p>
+            <h1 className="bz-title-serif max-w-[680px] text-[clamp(3.7rem,6vw,7.2rem)] font-semibold leading-[0.86] tracking-[-0.045em] text-[#1b1712]">
+              Sua barbearia no ritmo certo.
+            </h1>
+            <p className="mt-7 max-w-[590px] text-base leading-7 text-[#655c50] xl:text-lg xl:leading-8">
+              Agenda, clientes e operação em um só lugar para você dedicar mais tempo ao atendimento e menos à rotina administrativa.
+            </p>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="bz-kicker mb-3 block">E-mail de acesso</label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9f9689]">mail</span>
-                <input
-                  type="email"
-                  placeholder="nome@exemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bz-input py-3.5 pl-12 pr-4 text-base"
-                  required
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-3 flex items-center justify-between">
-                <label className="bz-kicker block">Senha</label>
-                <button type="button" className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d7ab3f] transition-colors hover:text-[#f0d57e]">
-                  Esqueceu?
-                </button>
-              </div>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9f9689]">lock</span>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bz-input py-3.5 pl-12 pr-12 text-base"
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9f9689] transition-colors hover:text-white"
+            <div className="mt-10 grid gap-3 xl:grid-cols-3">
+              {benefits.map((benefit) => (
+                <article
+                  key={benefit.title}
+                  className="bz-login-benefit rounded-[22px] border border-[#9f7a2c]/[0.16] bg-white/55 p-5 shadow-[0_14px_35px_rgba(84,62,25,0.06)]"
                 >
-                  <span className="material-symbols-outlined">{showPassword ? 'visibility' : 'visibility_off'}</span>
+                  <span className="material-symbols-outlined text-[24px] text-[#a97918]" aria-hidden="true">
+                    {benefit.icon}
+                  </span>
+                  <h2 className="mt-4 text-sm font-bold text-[#2a231b]">{benefit.title}</h2>
+                  <p className="mt-2 text-xs leading-5 text-[#756b5e]">{benefit.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="bz-login-reveal bz-login-reveal-delay-2 flex items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#756a5d]">
+            <span>BarberZap Atelier</span>
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#c49328] shadow-[0_0_12px_rgba(196,147,40,0.45)]" />
+              Ambiente seguro
+            </span>
+          </div>
+        </section>
+
+        <section className="flex min-h-[100dvh] items-center justify-center px-4 py-6 sm:px-8 sm:py-10 lg:px-10 xl:px-14">
+          <div className="bz-login-reveal bz-login-reveal-delay w-full max-w-[540px]">
+            <div className="mb-6 px-1 lg:hidden">
+              <BarberZapLogo compact label="BarberZap" tone="light" />
+            </div>
+
+            <div className="bz-login-card rounded-[28px] border border-[#9f7a2c]/[0.18] px-5 py-6 sm:rounded-[32px] sm:px-8 sm:py-8 xl:px-10 xl:py-9">
+              <header className="mb-7">
+                <div className="mb-5 flex items-center justify-between gap-4">
+                  <p className="bz-kicker text-[#956a16]">Acesso ao painel</p>
+                  <span className="flex items-center gap-2 text-[10px] font-semibold text-[#8b6b2c]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#c49328]" />
+                    Conexão protegida
+                  </span>
+                </div>
+                <h1 className="bz-title-serif text-[clamp(2.7rem,5vw,4rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-[#1c1712]">
+                  Bem-vindo de volta.
+                </h1>
+                <p className="mt-3 max-w-md text-sm leading-6 text-[#6d6255]">
+                  Entre com seus dados para continuar gerenciando sua operação.
+                </p>
+              </header>
+
+              {displayError && (
+                <div
+                  id="login-error"
+                  role="alert"
+                  aria-live="assertive"
+                  className="mb-5 flex items-start gap-3 rounded-2xl border border-[#b85c5c]/25 bg-[#fff2f1] px-4 py-3.5"
+                >
+                  <span className="material-symbols-outlined mt-0.5 text-[20px] text-[#b94a4a]" aria-hidden="true">
+                    error
+                  </span>
+                  <p className="text-sm leading-5 text-[#8f2f2f]">{displayError}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleLogin} className="space-y-5" aria-describedby={displayError ? 'login-error' : undefined}>
+                <div>
+                  <label htmlFor="login-email" className="mb-2.5 block text-xs font-bold text-[#3e352b]">
+                    E-mail de acesso
+                  </label>
+                  <div className="relative">
+                    <span
+                      className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[21px] text-[#8c7e6e]"
+                      aria-hidden="true"
+                    >
+                      mail
+                    </span>
+                    <input
+                      id="login-email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      placeholder="nome@exemplo.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      className="bz-input min-h-12 py-3.5 pl-12 pr-4 text-[15px]"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2.5 flex items-center justify-between gap-3">
+                    <label htmlFor="login-password" className="text-xs font-bold text-[#3e352b]">
+                      Senha
+                    </label>
+                    <button
+                      type="button"
+                      disabled
+                      className="flex cursor-not-allowed items-center gap-2 text-[10px] font-bold text-[#8e8173]"
+                    >
+                      Esqueceu a senha?
+                      <SoonBadge />
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <span
+                      className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[21px] text-[#8c7e6e]"
+                      aria-hidden="true"
+                    >
+                      lock
+                    </span>
+                    <input
+                      id="login-password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      className="bz-input min-h-12 py-3.5 pl-12 pr-12 text-[15px]"
+                      required
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      aria-pressed={showPassword}
+                      className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-[#8c7e6e] transition-colors hover:bg-black/[0.04] hover:text-[#2a2219] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8861d]/50"
+                    >
+                      <span className="material-symbols-outlined text-[21px]" aria-hidden="true">
+                        {showPassword ? 'visibility' : 'visibility_off'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bz-btn-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-xs uppercase tracking-[0.16em] transition-transform active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8861d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f2e9] disabled:cursor-wait disabled:opacity-60"
+                >
+                  {loading && <span className="bz-login-spinner" aria-hidden="true" />}
+                  {loading ? 'Entrando...' : 'Entrar no BarberZap'}
                 </button>
+
+                <div className="flex items-center gap-3 pt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-[#8a7c6b] before:h-px before:flex-1 before:bg-black/[0.09] after:h-px after:flex-1 after:bg-black/[0.09]">
+                  Acessos futuros
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {['Apple', 'Google'].map((provider) => (
+                    <button
+                      key={provider}
+                      type="button"
+                      disabled
+                      className="flex min-h-12 cursor-not-allowed items-center justify-center gap-2 rounded-2xl border border-[#2f281f]/[0.1] bg-white/60 px-3 text-xs font-semibold text-[#85786a]"
+                    >
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-black/[0.1] text-[10px] font-bold">
+                        {provider.charAt(0)}
+                      </span>
+                      {provider}
+                      <span className="hidden text-[8px] uppercase tracking-[0.12em] text-[#92836f] sm:inline">Em breve</span>
+                    </button>
+                  ))}
+                </div>
+              </form>
+
+              <div className="mt-6 border-t border-black/[0.08] pt-5 text-center">
+                <p className="text-xs text-[#7f7365]">
+                  Ainda não é parceiro?{' '}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/cadastro')}
+                    className="font-bold text-[#956a16] transition-colors hover:text-[#6f4d0b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8861d]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f2e9]"
+                  >
+                    Crie sua conta de teste
+                  </button>
+                </p>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="bz-btn-primary w-full rounded-[18px] px-6 py-4 text-sm uppercase tracking-[0.16em] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? 'Entrando...' : 'Entrar no BarberZap'}
-            </button>
-
-            <div className="flex items-center gap-3 pt-2 text-xs uppercase tracking-[0.24em] text-[#6f6659] before:h-px before:flex-1 before:bg-white/8 after:h-px after:flex-1 after:bg-white/8">
-              Ou continue com
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <button
-                type="button"
-                className="relative rounded-[18px] border border-white/8 bg-white/[0.03] px-5 py-3.5 text-sm font-semibold text-[#d8cdbd] transition-colors hover:bg-white/[0.05]"
-                disabled
-              >
-                <span className="absolute right-3 top-3 rounded-full bg-[#d7ab3f]/18 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-[#f0d57e]">
-                  Em breve
-                </span>
-                Continuar com Apple
-              </button>
-              <button
-                type="button"
-                className="relative rounded-[18px] border border-white/8 bg-white/[0.03] px-5 py-3.5 text-sm font-semibold text-[#d8cdbd] transition-colors hover:bg-white/[0.05]"
-                disabled
-              >
-                <span className="absolute right-3 top-3 rounded-full bg-[#d7ab3f]/18 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-[#f0d57e]">
-                  Em breve
-                </span>
-                Continuar com Google
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-8 text-center text-sm text-[#b8ac99] sm:text-base">
-            Não possui conta? <span className="font-semibold text-[#f0d57e]">Torne-se parceiro</span>
-          </p>
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-[10px] uppercase tracking-[0.22em] text-[#6f6659]">
-          <span>2024 BarberZap Atelier</span>
-          <span>Privacidade</span>
-          <span>Suporte</span>
-        </div>
+            <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[9px] font-bold uppercase tracking-[0.18em] text-[#8c8174]">
+              <span>© 2026 BarberZap</span>
+              <span>Privacidade</span>
+              <span>Suporte</span>
+            </footer>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
 

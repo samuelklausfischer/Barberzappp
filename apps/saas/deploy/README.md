@@ -1,5 +1,8 @@
 # BarberZap Multi-Region Deployment
 
+> Status: este diretorio e historico/experimental e nao e a fonte canonica nem uma autorizacao
+> de deploy. O arquivo `.env.example` e somente um inventario sem valores; nao coloque credenciais no Git.
+
 ## 🌍 Overview
 
 This repository contains the complete multi-region deployment infrastructure for BarberZap, enabling global scalability with low-latency access across multiple geographic regions.

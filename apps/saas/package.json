@@ -3,9 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:vercel": "node scripts/validate-vercel-env.mjs && npm run typecheck:app && npm run build",
+    "typecheck:app": "tsc -p tsconfig.app.json",
     "preview": "vite preview",
     "test:load:setup": "k6 run tests/load/setup.js",
     "test:load:cleanup": "k6 run --env DRY_RUN=false tests/load/cleanup.js",
@@ -32,7 +37,6 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@google/genai": "^1.34.0",
     "@supabase/supabase-js": "^2.99.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -41,12 +45,17 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.14.0",
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
     "@vitejs/plugin-react": "^5.0.0",
-    "eslint": "^10.1.0",
+    "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
     "prettier": "^3.8.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

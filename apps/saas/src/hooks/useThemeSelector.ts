@@ -435,6 +435,6 @@ export function useThemeSelector(options: UseThemeSelectorOptions = {}) {
 // Utility Functions
 // ============================================================================
 
-export function Debounce(callback: Function, delay: number): NodeJS.Timeout {
+export function Debounce(callback: () => void, delay: number): ReturnType<typeof setTimeout> {
   return setTimeout(callback, delay);
 }

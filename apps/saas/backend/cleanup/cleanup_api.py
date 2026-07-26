@@ -124,15 +124,12 @@ async def get_supabase_client():
 
 
 async def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())):
-    """Verify user is admin"""
-    # This would integrate with your auth system
-    # For now, just validate token exists
-    if not credentials:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
-    return credentials.credentials
+    """Block cleanup operations until a verified admin authorization exists."""
+    logger.warning("Cleanup API blocked: verified admin authorization is not implemented")
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Cleanup API is disabled until verified admin authorization is implemented"
+    )
 
 
 # ============================================================================

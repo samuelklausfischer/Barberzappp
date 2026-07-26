@@ -1,57 +1,106 @@
-
-import React from 'react';
-import { AppView } from '@/domain/types';
+﻿import React, { useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
+import { AppRole, getNavigationGroupsForRole } from '@/config/routes';
+import { useSidebarStore } from '@/stores/sidebarStore';
+import BarberZapLogo from '@/components/ui/BarberZapLogo';
 
 interface SidebarProps {
-  currentView: AppView;
-  onViewChange: (view: AppView) => void;
-  onLogout: () => void;
+  role: AppRole;
+  onLogout: () => void | Promise<void>;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onLogout }) => {
-  const menuItems = [
-    { id: 'dashboard', label: 'Home', icon: 'home' },
-    { id: 'agenda', label: 'Agenda', icon: 'calendar_month' },
-    { id: 'services', label: 'Serviços', icon: 'content_cut' },
-    { id: 'finance', label: 'Financeiro', icon: 'show_chart' },
-    { id: 'whatsapp', label: 'WhatsApp', icon: 'chat' },
-    { id: 'aiconfig', label: 'Config. IA', icon: 'psychology' },
-    { id: 'settings', label: 'Ajustes', icon: 'settings' },
-  ];
+const Sidebar: React.FC<SidebarProps> = ({ role, onLogout }) => {
+  const isCollapsed = useSidebarStore((state) => state.isCollapsed);
+  const toggle = useSidebarStore((state) => state.toggle);
+  const groups = getNavigationGroupsForRole(role);
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'b') {
+        event.preventDefault();
+        toggle();
+      }
+    };
+
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, [toggle]);
 
   return (
-    <aside className="w-64 bg-zinc-950 border-r border-white/5 flex flex-col hidden md:flex">
-      <div className="p-8 flex flex-col gap-2">
-        <div className="flex items-center gap-3 mb-10">
-          <span className="material-symbols-outlined text-[#f4c025] text-3xl">content_cut</span>
-          <h1 className="text-xl font-bold tracking-tight">BarberZap</h1>
-        </div>
-        
-        <nav className="space-y-2">
-          {menuItems.map((item) => (
+    <aside
+      className={`bz-sidebar-shell ${isCollapsed ? 'is-collapsed' : ''} hidden shrink-0 flex-col border-r border-[#E5E7EB] bg-white md:flex`}
+      aria-label="Barra lateral principal"
+    >
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className={`border-b border-[#E5E7EB] py-5 ${isCollapsed ? 'px-3' : 'px-5'}`}>
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between gap-2'}`}>
+            <BarberZapLogo
+              compact
+              label={isCollapsed ? undefined : 'BarberZap'}
+              tone="light"
+              className={isCollapsed ? 'justify-center [&>div:last-child]:hidden' : 'min-w-0 gap-2'}
+            />
             <button
-              key={item.id}
-              onClick={() => onViewChange(item.id as AppView)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                currentView === item.id 
-                ? 'bg-[#f4c025]/10 text-[#f4c025] border-l-4 border-[#f4c025]' 
-                : 'text-zinc-500 hover:text-white hover:bg-white/5'
-              }`}
+              type="button"
+              onClick={toggle}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[#6B7280] transition-colors hover:bg-[#F7F8FA] hover:text-[#1A1A1F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37] ${isCollapsed ? 'absolute left-[4.75rem] top-4' : ''}`}
+              aria-expanded={!isCollapsed}
+              aria-controls="saas-sidebar-navigation"
+              aria-label={isCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
+              title={isCollapsed ? 'Expandir barra lateral (Ctrl/Cmd+B)' : 'Recolher barra lateral (Ctrl/Cmd+B)'}
             >
-              <span className="material-symbols-outlined">{item.icon}</span>
-              <span className="font-semibold text-sm">{item.label}</span>
+              <span className="material-symbols-outlined text-[21px]" aria-hidden="true">
+                {isCollapsed ? 'chevron_right' : 'chevron_left'}
+              </span>
             </button>
+          </div>
+        </div>
+
+        <nav id="saas-sidebar-navigation" className="min-h-0 flex-1 overflow-y-auto px-3 py-5" aria-label="Navegação principal">
+          {groups.map((group, groupIndex) => (
+            <section key={group.id} className={groupIndex > 0 ? 'mt-6 border-t border-[#E5E7EB] pt-5' : ''} aria-labelledby={`sidebar-group-${group.id}`}>
+              <p
+                id={`sidebar-group-${group.id}`}
+                className={`mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#9CA3AF] ${isCollapsed ? 'sr-only' : ''}`}
+              >
+                {group.label}
+              </p>
+              <div className="space-y-1">
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.id}
+                    to={item.path}
+                    end={item.path === '/'}
+                    title={isCollapsed ? item.label : undefined}
+                    aria-label={isCollapsed ? item.label : undefined}
+                    className={({ isActive }) => [
+                      'flex min-h-11 w-full items-center rounded-xl border-l-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37] focus-visible:outline-offset-1',
+                      isCollapsed ? 'justify-center px-2' : 'gap-3 px-3.5 py-2.5',
+                      isActive
+                        ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#8B6B12]'
+                        : 'border-transparent text-[#6B7280] hover:bg-[#F7F8FA] hover:text-[#1A1A1F]',
+                    ].join(' ')}
+                  >
+                    <span className="material-symbols-outlined text-[21px]" aria-hidden="true">{item.icon}</span>
+                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                  </NavLink>
+                ))}
+              </div>
+            </section>
           ))}
         </nav>
       </div>
 
-      <div className="mt-auto p-8">
-        <button 
-          onClick={onLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+      <div className={`border-t border-[#E5E7EB] py-4 ${isCollapsed ? 'px-3' : 'px-5'}`}>
+        <button
+          type="button"
+          onClick={() => void onLogout()}
+          className={`flex min-h-11 w-full items-center rounded-xl text-sm font-semibold text-[#6B7280] transition-colors hover:bg-[#FEF2F2] hover:text-[#B42318] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37] ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-3.5 py-2.5'}`}
+          title={isCollapsed ? 'Sair' : undefined}
+          aria-label={isCollapsed ? 'Sair' : undefined}
         >
-          <span className="material-symbols-outlined">logout</span>
-          <span className="font-semibold text-sm">Sair</span>
+          <span className="material-symbols-outlined text-[21px]" aria-hidden="true">logout</span>
+          {!isCollapsed && <span>Sair</span>}
         </button>
       </div>
     </aside>

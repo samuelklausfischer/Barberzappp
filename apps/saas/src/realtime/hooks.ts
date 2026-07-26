@@ -319,15 +319,16 @@ function useRealtimeBase<T>(
           const newData = prevData ? [...prevData] : [];
           
           switch (eventType) {
-            case 'INSERT':
+            case 'INSERT': {
               const newRecord = payload.new;
               if (!filterFn || filterFn(newRecord)) {
                 newData.push(newRecord);
               }
               setLastUpdate(Date.now());
               break;
+            }
               
-            case 'UPDATE':
+            case 'UPDATE': {
               const index = newData.findIndex(item => (item as any).id === payload.new.id);
               if (index !== -1) {
                 const updatedRecord = payload.new;
@@ -343,14 +344,16 @@ function useRealtimeBase<T>(
               }
               setLastUpdate(Date.now());
               break;
+            }
               
-            case 'DELETE':
+            case 'DELETE': {
               const deletedIndex = newData.findIndex(item => (item as any).id === payload.old.id);
               if (deletedIndex !== -1) {
                 newData.splice(deletedIndex, 1);
               }
               setLastUpdate(Date.now());
               break;
+            }
           }
           
           // Atualizar cache

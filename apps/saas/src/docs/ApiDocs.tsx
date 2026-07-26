@@ -264,7 +264,7 @@ export const ApiDocs: React.FC<ApiDocsProps> = ({
     // Reload iframe
     const iframe = document.getElementById('docs-iframe') as HTMLIFrameElement;
     if (iframe) {
-      iframe.src = iframe.src;
+      iframe.contentWindow?.location.reload();
     }
   }, [loadVersions, loadStats]);
   

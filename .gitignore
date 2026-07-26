@@ -1,38 +1,83 @@
-# OS
-.DS_Store
-Thumbs.db
+# Segredos e configuração local
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
 
-# Logs
+# JavaScript / TypeScript
+node_modules/
+dist/
+build/
+.vite/
+.turbo/
+.npm/
+coverage/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Logs e temporários
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
 
-# Env (never commit)
-.env
-.env.*
-!.env.example
-
-# Node
-node_modules/
-dist/
-build/
-.vite/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.venv/
-venv/
-.pytest_cache/
-
-# IDE
-.vscode/
+# IDE e sistema operacional
 .idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Misc
+# Terraform e infraestrutura local
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Dados operacionais locais
+apps/site/data/*.csv
+
+# Recuperação local dos metadados Git
+/.git.placeholder-*
+/.git.failed-recovery-*
+
+# Arquivos de distribuição local
 *.tgz
 *.tar.gz
+
+# Artefatos e ferramentas locais adicionais
+dist-ssr/
+*.local
+.cache/
+.vercel/
+*.db
+*.swo
+*~
+.claude/
+.gemini/
+.openclaw/
+apps/saas/~/

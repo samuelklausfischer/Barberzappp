@@ -17,8 +17,8 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#09090b]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#f4c025] border-t-transparent"></div>
+      <div className="h-screen flex items-center justify-center bg-[#F7F8FA]">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#D4AF37] border-t-transparent"></div>
       </div>
     );
   }

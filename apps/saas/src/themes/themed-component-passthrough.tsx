@@ -313,7 +313,7 @@ export const ThemedText = forwardRef<HTMLParagraphElement, ThemedTextProps>(
 
 ThemedText.displayName = 'ThemedText';
 
-export interface ThemedLinkProps extends HTMLAttributes<HTMLAnchorElement> {}
+export type ThemedLinkProps = HTMLAttributes<HTMLAnchorElement>;
 
 /**
  * ThemedLink - Link component with theme support

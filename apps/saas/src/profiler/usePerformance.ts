@@ -428,7 +428,7 @@ export function useMeasureLayout(componentName?: string) {
 
 // Helper para forçar layout
 function forceLayout(): void {
-  document.body.offsetHeight; // Force reflow
+  void document.body.offsetHeight; // Force reflow
 }
 
 // ============================================

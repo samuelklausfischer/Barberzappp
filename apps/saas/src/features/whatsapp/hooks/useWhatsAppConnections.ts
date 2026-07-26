@@ -91,7 +91,10 @@ export const useWhatsAppConnections = () => {
 
       const connection = connections.find(c => c.id === id);
       if (connection) {
-        await evolutionService.deleteInstance(connection.instance_name);
+        const remoteResult = await evolutionService.deleteInstance(connection.instance_name);
+        if (!remoteResult.success) {
+          return { success: false, error: remoteResult.error || 'Integracao de WhatsApp indisponivel' };
+        }
       }
 
       const { error: deleteError } = await supabase

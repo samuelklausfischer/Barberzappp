@@ -1,13 +1,13 @@
 import React from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
-interface TenantContext {
+interface TenantContextValue {
   tenantId: string | null;
   role: 'owner' | 'employee' | null;
   loading: boolean;
 }
 
-const TenantContext = React.createContext<TenantContext>({
+const TenantContext = React.createContext<TenantContextValue>({
   tenantId: null,
   role: null,
   loading: true,
@@ -16,7 +16,7 @@ const TenantContext = React.createContext<TenantContext>({
 export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { membership, loading } = useAuth();
 
-  const value: TenantContext = {
+  const value: TenantContextValue = {
     tenantId: membership?.tenant_id || null,
     role: membership?.role || null,
     loading,

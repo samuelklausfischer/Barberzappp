@@ -8,39 +8,31 @@ import AIConfig from '@/components/aiconfig/AIConfig';
 import WhatsAppConnect from '@/components/whatsapp/WhatsAppConnect';
 import ClientsList from '@/components/clients/ClientsList';
 import Login from '@/components/auth/Login';
+import TrialRegistration from '@/components/auth/TrialRegistration';
 import { RoleGuard } from '@/components/auth/RoleGuard';
+import PublicOnlyRoute from '@/components/auth/PublicOnlyRoute';
 import GeneralSettings from '@/components/settings/GeneralSettings';
-
-export type RoutePath = 
-  | 'dashboard' 
-  | 'agenda' 
-  | 'finance' 
-  | 'whatsapp' 
-  | 'services' 
-  | 'clients'
-  | 'aiconfig' 
-  | 'settings'
-  | 'login';
-
-export const routes: { path: string; name: RoutePath }[] = [
-  { path: '/', name: 'dashboard' },
-  { path: '/agenda', name: 'agenda' },
-  { path: '/finance', name: 'finance' },
-  { path: '/whatsapp', name: 'whatsapp' },
-  { path: '/services', name: 'services' },
-  { path: '/clients', name: 'clients' },
-  { path: '/aiconfig', name: 'aiconfig' },
-  { path: '/settings', name: 'settings' },
-  { path: '/login', name: 'login' },
-];
+import { APP_PATHS } from '@/config/routes';
 
 export const router = createBrowserRouter([
   {
-    path: '/login',
-    element: <Login />,
+    path: APP_PATHS.LOGIN,
+    element: (
+      <PublicOnlyRoute>
+        <Login />
+      </PublicOnlyRoute>
+    ),
   },
   {
-    path: '/',
+    path: APP_PATHS.REGISTRATION,
+    element: (
+      <PublicOnlyRoute>
+        <TrialRegistration />
+      </PublicOnlyRoute>
+    ),
+  },
+  {
+    path: APP_PATHS.DASHBOARD,
     element: <AppLayout />,
     children: [
       {
@@ -48,11 +40,11 @@ export const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: 'agenda',
+        path: APP_PATHS.AGENDA,
         element: <Agenda />,
       },
       {
-        path: 'finance',
+        path: APP_PATHS.FINANCE,
         element: (
           <RoleGuard allowedRoles={['owner']}>
             <Finance />
@@ -60,7 +52,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'aiconfig',
+        path: APP_PATHS.AICONFIG,
         element: (
           <RoleGuard allowedRoles={['owner']}>
             <AIConfig />
@@ -68,7 +60,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'settings',
+        path: APP_PATHS.SETTINGS,
         element: (
           <RoleGuard allowedRoles={['owner']}>
             <GeneralSettings />
@@ -76,21 +68,21 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'whatsapp',
+        path: APP_PATHS.WHATSAPP,
         element: <WhatsAppConnect />,
       },
       {
-        path: 'services',
+        path: APP_PATHS.SERVICES,
         element: <ServicesList />,
       },
       {
-        path: 'clients',
+        path: APP_PATHS.CLIENTS,
         element: <ClientsList />,
       },
     ],
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <Navigate to={APP_PATHS.DASHBOARD} replace />,
   },
 ]);

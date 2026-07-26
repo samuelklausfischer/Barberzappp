@@ -98,6 +98,7 @@ const sizeClasses: Record<ButtonSize, string> = {
   md: 'h-12 px-6 text-sm gap-2',
   lg: 'h-14 px-8 text-base gap-3',
   xl: 'h-16 px-10 text-lg gap-3',
+  icon: 'h-10 w-10',
 };
 
 // Icon-only sizes (square dimensions)
@@ -112,12 +113,12 @@ const iconSizeClasses: Record<ButtonSize, string> = {
 
 // Variant configuration
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-[#f4c025] hover:bg-[#d9a419] active:bg-[#b89116] text-black font-bold shadow-lg shadow-[#f4c025]/20',
-  secondary: 'border border-white/10 hover:bg-white/5 hover:border-white/20 text-white font-bold',
-  danger: 'bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-bold shadow-lg shadow-red-950/40',
-  ghost: 'bg-transparent hover:bg-white/5 active:bg-white/10 text-zinc-400 hover:text-white',
-  link: 'bg-transparent text-[#f4c025] hover:text-[#d9a419] hover:underline px-0 py-0 shadow-none',
-  success: 'bg-green-600 hover:bg-green-500 active:bg-green-700 text-white font-bold shadow-lg shadow-green-950/40',
+  primary: 'bg-[#D4AF37] hover:bg-[#B99220] active:bg-[#9C7717] text-[#1A1A1F] font-bold shadow-sm shadow-[#D4AF37]/25',
+  secondary: 'border border-[#D1D5DB] bg-white hover:bg-[#F7F8FA] hover:border-[#9CA3AF] text-[#1A1A1F] font-semibold',
+  danger: 'bg-[#B42318] hover:bg-[#912018] active:bg-[#7A271A] text-white font-bold shadow-sm shadow-red-900/15',
+  ghost: 'bg-transparent hover:bg-[#F3F4F6] active:bg-[#E5E7EB] text-[#4B5563] hover:text-[#1A1A1F]',
+  link: 'bg-transparent text-[#8A6A11] hover:text-[#6B530D] hover:underline px-0 py-0 shadow-none',
+  success: 'bg-[#15803D] hover:bg-[#166534] active:bg-[#14532D] text-white font-bold shadow-sm shadow-green-900/15',
 };
 
 // Shape configuration
@@ -191,9 +192,9 @@ export const Button: React.FC<ButtonProps> = ({
       return `
         inline-flex items-center font-semibold
         transition-colors
-        focus:outline-none focus:ring-2 focus:ring-[#f4c025]/50
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50
         disabled:opacity-50 disabled:cursor-not-allowed
-        ${variantClasses[link]}
+        ${variantClasses[variant]}
         ${active ? 'underline' : ''}
         ${className || ''}
       `.replace(/\s+/g, ' ').trim();
@@ -215,10 +216,10 @@ export const Button: React.FC<ButtonProps> = ({
       ${variantClasses[variant]}
       ${isGhost || isDisabled ? '' : shapeClasses[shape]}
       ${fullWidth ? 'w-full' : ''}
-      ${active ? 'opacity-90 ring-2 ring-[#f4c025]/50' : ''}
+      ${active ? 'opacity-90 ring-2 ring-[#D4AF37]/50' : ''}
       ${isDisabled ? 'opacity-50 cursor-not-allowed pointer-events-none grayscale' : ''}
       transition-all duration-200
-      focus:outline-none focus:ring-2 focus:ring-[#f4c025]/50 focus:ring-offset-2 focus:ring-offset-zinc-950
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white
       ${animationClass}
       ${className || ''}
     `.replace(/\s+/g, ' ').trim();

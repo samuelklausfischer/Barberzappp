@@ -142,7 +142,7 @@ WHATSAPP_API_URL=https://graph.facebook.com/v18.0
 # ============================================================================
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
 ---

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useId } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,98 +8,33 @@ interface ModalProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export const Modal: React.FC<ModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
-  size = 'md' 
-}) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  const titleId = useId();
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
   if (!isOpen) return null;
-
-  const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-  };
-
+  const sizeClasses = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl' };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div className={`relative w-full ${sizeClasses[size]} mx-4 bz-panel rounded-[24px] animate-in zoom-in-95 duration-200`}>
-        <div className="flex items-center justify-between border-b border-white/6 px-5 py-4 sm:px-6">
-          <div>
-            <p className="bz-kicker mb-2">Edição guiada</p>
-            <h2 className="bz-title-serif text-3xl leading-none">{title}</h2>
-          </div>
-          <button 
-            onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-zinc-400 transition-colors hover:text-white hover:bg-white/5"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="presentation">
+      <button type="button" aria-label="Fechar modal" className="absolute inset-0 cursor-default bg-[#1A1A1F]/35 backdrop-blur-sm" onClick={onClose} />
+      <div className={`relative flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-y-auto rounded-2xl border border-[#E5E7EB] bg-white shadow-2xl shadow-[#1A1A1F]/15 sm:max-h-[calc(100vh-3rem)] sm:rounded-3xl ${sizeClasses[size]}`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <div className="flex items-center justify-between gap-4 border-b border-[#E5E7EB] px-5 py-4 sm:px-6">
+          <div><p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#6B7280]">Edicao guiada</p><h2 id={titleId} className="text-xl font-semibold leading-tight text-[#1A1A1F] sm:text-2xl">{title}</h2></div>
+          <button type="button" onClick={onClose} aria-label="Fechar modal" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F7F8FA] hover:text-[#1A1A1F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"><span className="material-symbols-outlined">close</span></button>
         </div>
-        <div className="px-5 py-5 sm:px-6 sm:py-6">
-          {children}
-        </div>
+        <div className="px-5 py-5 sm:px-6 sm:py-6">{children}</div>
       </div>
     </div>
   );
 };
 
-interface ConfirmModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  variant?: 'danger' | 'warning' | 'info';
-  loading?: boolean;
-}
-
-export const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  message,
-  confirmLabel = 'Confirmar',
-  cancelLabel = 'Cancelar',
-  variant = 'danger',
-  loading = false,
-}) => {
+interface ConfirmModalProps { isOpen: boolean; onClose: () => void; onConfirm: () => void; title: string; message: string; confirmLabel?: string; cancelLabel?: string; variant?: 'danger' | 'warning' | 'info'; loading?: boolean; }
+export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onConfirm, title, message, confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', variant = 'danger', loading = false }) => {
   if (!isOpen) return null;
-
-  const variantClasses = {
-    danger: 'bg-red-500 hover:bg-red-600 text-white',
-    warning: 'bg-yellow-500 hover:bg-yellow-600 text-black',
-    info: 'bg-blue-500 hover:bg-blue-600 text-white',
-  };
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <p className="mb-6 text-sm leading-7 text-[#c8bdab]">{message}</p>
-      <div className="flex gap-3 justify-end">
-        <button
-          onClick={onClose}
-          disabled={loading}
-          className="rounded-full border border-white/8 px-5 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white disabled:opacity-50"
-        >
-          {cancelLabel}
-        </button>
-        <button
-          onClick={onConfirm}
-          disabled={loading}
-          className={`rounded-full px-5 py-3 text-sm font-semibold transition-colors disabled:opacity-50 ${variantClasses[variant]}`}
-        >
-          {loading ? 'Processando...' : confirmLabel}
-        </button>
-      </div>
-    </Modal>
-  );
+  const variantClasses = { danger: 'bg-[#B42318] hover:bg-[#912018] text-white', warning: 'bg-[#D4AF37] hover:bg-[#B99220] text-[#1A1A1F]', info: 'bg-[#175CD3] hover:bg-[#1849A9] text-white' };
+  return <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm"><p className="mb-6 text-sm leading-7 text-[#4B5563]">{message}</p><div className="flex flex-col-reverse justify-end gap-3 sm:flex-row"><button type="button" onClick={onClose} disabled={loading} className="min-h-11 rounded-full border border-[#D1D5DB] bg-white px-5 py-3 text-sm font-semibold text-[#4B5563] transition-colors hover:bg-[#F7F8FA] hover:text-[#1A1A1F] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50">{cancelLabel}</button><button type="button" onClick={onConfirm} disabled={loading} className={`min-h-11 rounded-full px-5 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 ${variantClasses[variant]}`}>{loading ? 'Processando...' : confirmLabel}</button></div></Modal>;
 };

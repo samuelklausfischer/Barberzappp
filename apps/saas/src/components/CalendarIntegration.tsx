@@ -123,9 +123,11 @@ export const CalendarIntegration: React.FC<CalendarIntegrationProps> = ({
       // Listen for OAuth callback
       const handleMessage = (event: MessageEvent) => {
         if (event.data.type === 'GOOGLE_OAUTH_CALLBACK') {
-          event.data.success 
-            ? handleOAuthSuccess(event.data.credentials)
-            : handleOAuthError(event.data.error);
+          if (event.data.success) {
+            handleOAuthSuccess(event.data.credentials);
+          } else {
+            handleOAuthError(event.data.error);
+          }
           
           // Cleanup
           window.removeEventListener('message', handleMessage);

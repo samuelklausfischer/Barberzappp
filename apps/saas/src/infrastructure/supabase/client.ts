@@ -1,9 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://htssqiupscyhhueqwpgu.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseApiKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+if (!supabaseUrl || !supabaseApiKey) {
+  throw new Error(
+    'Supabase configuration is missing. Define VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY).'
+  );
+}
+
+export const supabase = createClient(supabaseUrl, supabaseApiKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -171,6 +178,8 @@ export type Database = {
           prompt_business_rules: string | null;
           business_hours: unknown | null;
           whatsapp_status: string | null;
+          trial_started_at: string | null;
+          trial_ends_at: string | null;
         };
         Insert: {
           id?: string;
@@ -186,6 +195,8 @@ export type Database = {
           prompt_business_rules?: string | null;
           business_hours?: unknown | null;
           whatsapp_status?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
         };
         Update: {
           id?: string;
@@ -201,6 +212,8 @@ export type Database = {
           prompt_business_rules?: string | null;
           business_hours?: unknown | null;
           whatsapp_status?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
         };
       };
       profiles: {

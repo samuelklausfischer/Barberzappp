@@ -48,12 +48,12 @@ export interface BadgeProps {
 
 // Variant configuration
 const variantClasses: Record<BadgeVariant, string> = {
-  default: 'bg-white/10 text-white border border-white/5',
-  success: 'bg-green-500/10 text-green-500 border border-green-500/20',
-  warning: 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20',
-  danger: 'bg-red-500/10 text-red-500 border border-red-500/20',
-  info: 'bg-blue-500/10 text-blue-500 border border-blue-500/20',
-  gold: 'bg-[#f4c025]/10 text-[#f4c025] border border-[#f4c025]/20',
+  default: 'bg-[#F3F4F6] text-[#4B5563] border border-[#E5E7EB]',
+  success: 'bg-[#ECFDF3] text-[#15803D] border border-[#BBF7D0]',
+  warning: 'bg-[#FFFAEB] text-[#A15C00] border border-[#FEDF89]',
+  danger: 'bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]',
+  info: 'bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF]',
+  gold: 'bg-[#FFFAEB] text-[#8A6A11] border border-[#F4D06F]',
 };
 
 // Size configuration

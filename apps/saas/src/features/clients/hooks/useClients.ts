@@ -1,19 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, Client } from '@/infrastructure/supabase/client';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useTenant } from '@/features/auth/hooks/useTenant';
+
+type ClientInput = Pick<Client, 'name' | 'phone' | 'email' | 'avatar_url'>;
 
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { tenantId } = useTenant();
 
   const fetchClients = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      if (!user?.id) {
+
+      if (!tenantId) {
         setClients([]);
         setLoading(false);
         return;
@@ -22,11 +24,11 @@ export const useClients = () => {
       const { data, error: fetchError } = await supabase
         .from('clients')
         .select('*')
-        .eq('barber_id', user.id)
+        .eq('tenant_id', tenantId)
         .order('name', { ascending: true });
 
       if (fetchError) throw fetchError;
-      
+
       setClients(data || []);
     } catch (err) {
       console.error('Erro ao buscar clientes:', err);
@@ -34,112 +36,136 @@ export const useClients = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [tenantId]);
 
-  const createClient = useCallback(async (client: Omit<Client, 'id'>) => {
-    try {
-      setError(null);
+  const createClient = useCallback(
+    async (client: ClientInput) => {
+      try {
+        setError(null);
 
-      if (!user?.id) {
-        throw new Error('Usuário não autenticado');
+        if (!tenantId) {
+          throw new Error('Barbearia não identificada');
+        }
+
+        const clientWithScope = {
+          ...client,
+          tenant_id: tenantId,
+          shop_id: tenantId,
+          user_id: tenantId,
+        };
+
+        const { data, error: insertError } = await supabase
+          .from('clients')
+          .insert(clientWithScope)
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
+        if (data) {
+          setClients((prev) => [...prev, data]);
+        }
+
+        return data;
+      } catch (err) {
+        console.error('Erro ao criar cliente:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Erro ao criar cliente';
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
+    },
+    [tenantId]
+  );
 
-      const clientWithOwner = {
-        ...client,
-        barber_id: client.barber_id || user.id,
-      };
-       
-      const { data, error: insertError } = await supabase
-        .from('clients')
-        .insert(clientWithOwner)
-        .select()
-        .single();
+  const updateClient = useCallback(
+    async (id: string, updates: Partial<ClientInput>) => {
+      try {
+        setError(null);
 
-      if (insertError) throw insertError;
-      
-      if (data) {
-        setClients(prev => [...prev, data]);
+        if (!tenantId) {
+          throw new Error('Barbearia não identificada');
+        }
+
+        const { data, error: updateError } = await supabase
+          .from('clients')
+          .update(updates)
+          .eq('id', id)
+          .eq('tenant_id', tenantId)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+
+        if (data) {
+          setClients((prev) => prev.map((c) => (c.id === id ? data : c)));
+        }
+
+        return data;
+      } catch (err) {
+        console.error('Erro ao atualizar cliente:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar cliente';
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
-      
-      return data;
-    } catch (err) {
-      console.error('Erro ao criar cliente:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao criar cliente';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, [user?.id]);
+    },
+    [tenantId]
+  );
 
-  const updateClient = useCallback(async (id: string, updates: Partial<Client>) => {
-    try {
-      setError(null);
-      
-      const { data, error: updateError } = await supabase
-        .from('clients')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+  const deleteClient = useCallback(
+    async (id: string) => {
+      try {
+        setError(null);
 
-      if (updateError) throw updateError;
-      
-      if (data) {
-        setClients(prev => prev.map(c => c.id === id ? data : c));
+        if (!tenantId) {
+          throw new Error('Barbearia não identificada');
+        }
+
+        const { error: deleteError } = await supabase
+          .from('clients')
+          .delete()
+          .eq('id', id)
+          .eq('tenant_id', tenantId);
+
+        if (deleteError) throw deleteError;
+
+        setClients((prev) => prev.filter((c) => c.id !== id));
+      } catch (err) {
+        console.error('Erro ao excluir cliente:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir cliente';
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
-      
-      return data;
-    } catch (err) {
-      console.error('Erro ao atualizar cliente:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar cliente';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, []);
+    },
+    [tenantId]
+  );
 
-  const deleteClient = useCallback(async (id: string) => {
-    try {
-      setError(null);
-      
-      const { error: deleteError } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', id);
+  const searchByPhone = useCallback(
+    async (phone: string) => {
+      try {
+        setError(null);
 
-      if (deleteError) throw deleteError;
-      
-      setClients(prev => prev.filter(c => c.id !== id));
-    } catch (err) {
-      console.error('Erro ao excluir cliente:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir cliente';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, []);
+        if (!tenantId) {
+          return [];
+        }
 
-  const searchByPhone = useCallback(async (phone: string) => {
-    try {
-      setError(null);
+        const { data, error: searchError } = await supabase
+          .from('clients')
+          .select('*')
+          .ilike('phone', `%${phone}%`)
+          .eq('tenant_id', tenantId);
 
-      if (!user?.id) {
-        return [];
+        if (searchError) throw searchError;
+
+        return data || [];
+      } catch (err) {
+        console.error('Erro ao buscar por telefone:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar cliente';
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
-       
-      const { data, error: searchError } = await supabase
-        .from('clients')
-        .select('*')
-        .ilike('phone', `%${phone}%`)
-        .eq('barber_id', user.id);
-
-      if (searchError) throw searchError;
-      
-      return data || [];
-    } catch (err) {
-      console.error('Erro ao buscar por telefone:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar cliente';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, [user?.id]);
+    },
+    [tenantId]
+  );
 
   useEffect(() => {
     fetchClients();

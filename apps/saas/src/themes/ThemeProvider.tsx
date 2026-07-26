@@ -143,7 +143,7 @@ function themeReducer(state: ThemeState, action: ThemeAction): ThemeState {
           }
         : state;
     
-    case 'RESET_THEME':
+    case 'RESET_THEME': {
       const defaultTheme = themes[0];
       return {
         ...state,
@@ -152,6 +152,7 @@ function themeReducer(state: ThemeState, action: ThemeAction): ThemeState {
         isDark: false,
         isPreview: false,
       };
+    }
     
     default:
       return state;
