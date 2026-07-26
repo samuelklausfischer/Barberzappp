@@ -17,7 +17,8 @@
   --bz-page-max: 1280px;
   --bz-sidebar-expanded: 16rem;
   --bz-sidebar-collapsed: 4.5rem;
-  --bz-mobile-nav-height: 4.75rem;
+  --bz-mobile-nav-content-height: 4.25rem;
+  --bz-mobile-nav-height: calc(var(--bz-mobile-nav-content-height) + max(0.5rem, env(safe-area-inset-bottom)));
 }
 html { font-size: 14px; color-scheme: light; }
 @media (min-width: 1280px) { html { font-size: 13px; } }
@@ -54,6 +55,7 @@ body { margin: 0; background: var(--bz-bg); color: var(--bz-text); font-family: 
   min-height: var(--bz-mobile-nav-height);
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
+.bz-mobile-nav-content { min-height: var(--bz-mobile-nav-content-height); }
 .bz-mobile-sheet {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }

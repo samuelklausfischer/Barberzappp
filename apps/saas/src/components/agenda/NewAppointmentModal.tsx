@@ -194,7 +194,7 @@ export const NewAppointmentModal: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => void refresh()}
-              className="ml-2 font-semibold underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+              className="ml-2 inline-flex min-h-11 items-center font-semibold underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
             >
               Tentar novamente
             </button>
@@ -236,7 +236,7 @@ export const NewAppointmentModal: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => setClientId('')}
-                  className="text-sm font-semibold text-[#7A5E12]"
+                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-[#7A5E12] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
                 >
                   Alterar
                 </button>
@@ -388,7 +388,7 @@ export const NewAppointmentModal: React.FC<Props> = ({
                   key={service.id}
                   type="button"
                   onClick={() => toggleService(service.id)}
-                  className="rounded-full bg-[#FFFAE9] px-3 py-1.5 text-xs font-semibold text-[#7A5E12] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+                  className="inline-flex min-h-11 items-center rounded-full bg-[#FFFAE9] px-3 py-1.5 text-xs font-semibold text-[#7A5E12] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
                 >
                   {service.name} <span aria-hidden="true">×</span>
                   <span className="sr-only">Remover</span>
@@ -495,7 +495,7 @@ export const NewAppointmentModal: React.FC<Props> = ({
             </p>
           ) : null}
         </aside>
-        <div className="flex flex-col-reverse gap-3 border-t border-[#E5E7EB] pt-5 sm:flex-row sm:justify-end">
+        <div className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse gap-3 border-t border-[#E5E7EB] bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 shadow-[0_-8px_16px_rgba(26,26,31,0.04)] sm:static sm:mx-0 sm:flex-row sm:justify-end sm:border-t sm:px-0 sm:pb-0 sm:pt-5 sm:shadow-none">
           <button
             type="button"
             onClick={onClose}

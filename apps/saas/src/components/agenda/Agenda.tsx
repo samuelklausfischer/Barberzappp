@@ -210,7 +210,7 @@ const Agenda: React.FC = () => {
 
       <Panel className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid w-full grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <button
               type="button"
               aria-label="Dia anterior"
@@ -239,7 +239,7 @@ const Agenda: React.FC = () => {
             >
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            <div className="flex w-full flex-wrap gap-2 pt-1 sm:w-auto sm:pt-0">
+            <div className="col-span-3 grid grid-cols-3 gap-2 pt-1 sm:flex sm:w-auto sm:flex-wrap sm:pt-0">
               {[
                 { label: 'Ontem', date: addCalendarDays(today, -1) },
                 { label: 'Hoje', date: today },
@@ -263,7 +263,7 @@ const Agenda: React.FC = () => {
           </div>
 
           <div
-            className="grid grid-cols-3 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-1"
+            className="grid w-full grid-cols-3 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-1 sm:w-auto"
             role="group"
             aria-label="Modo de visualização"
           >
@@ -541,6 +541,9 @@ const TimelineView: React.FC<{
         <p className="text-sm font-semibold text-[#1A1A1F]">Grade do dia</p>
         <p className="mt-0.5 text-xs text-[#6B7280]">
           Horários que se sobrepõem são exibidos lado a lado.
+        </p>
+        <p className="mt-2 text-xs font-medium text-[#7A5E12] sm:hidden">
+          Deslize para os lados para visualizar toda a grade.
         </p>
       </div>
       <div className="overflow-x-auto overscroll-contain">

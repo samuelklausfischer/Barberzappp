@@ -24,15 +24,15 @@ const ServicesList: React.FC = () => {
     void fetchBarbers();
   };
   return (
-    <div className="space-y-8 text-[#1A1A1F] animate-in fade-in duration-500">
-      <header className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+    <div className="space-y-6 text-[#1A1A1F] animate-in fade-in duration-500 sm:space-y-8">
+      <header className="flex flex-col justify-between gap-4 sm:gap-6 md:flex-row md:items-end">
         <div>
-          <h1 className="mb-2 text-4xl font-black tracking-tight">Meus Serviços</h1>
+          <h1 className="mb-2 text-3xl font-black tracking-tight sm:text-4xl">Meus Serviços</h1>
           <p className="text-zinc-500">Gerencie o catálogo de serviços oferecidos na barbearia</p>
         </div>
         <button
           onClick={openModal}
-          className="flex h-12 items-center gap-2 rounded-xl bg-[#D4AF37] px-8 font-bold text-[#1A1A1F] shadow-lg transition-all hover:bg-[#b89222] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-6 py-3 font-bold text-[#1A1A1F] shadow-lg transition-all hover:bg-[#b89222] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto sm:px-8"
         >
           <span className="material-symbols-outlined">add</span>Novo Serviço
         </button>
@@ -47,18 +47,18 @@ const ServicesList: React.FC = () => {
       ) : null}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
-          <div className="col-span-full rounded-3xl border border-[#E5E7EB] bg-white p-12 text-center text-[#6B7280] shadow-[0_8px_24px_rgba(26,26,31,0.04)]">
+          <div className="col-span-full rounded-3xl border border-[#E5E7EB] bg-white p-6 text-center text-[#6B7280] shadow-[0_8px_24px_rgba(26,26,31,0.04)] sm:p-12">
             Carregando serviços...
           </div>
         ) : error ? (
           <div
             role="alert"
-            className="col-span-full rounded-3xl border border-red-200 bg-red-50 p-12 text-center text-red-700"
+            className="col-span-full rounded-3xl border border-red-200 bg-red-50 p-6 text-center text-red-700 sm:p-12"
           >
             Não foi possível carregar os serviços.
           </div>
         ) : services.length === 0 ? (
-          <div className="col-span-full rounded-3xl border border-dashed border-[#D1D5DB] bg-white p-12 text-center shadow-[0_8px_24px_rgba(26,26,31,0.04)]">
+          <div className="col-span-full rounded-3xl border border-dashed border-[#D1D5DB] bg-white p-6 text-center shadow-[0_8px_24px_rgba(26,26,31,0.04)] sm:p-12">
             <span className="material-symbols-outlined mb-3 text-4xl text-[#9CA3AF]">
               content_cut
             </span>
@@ -71,7 +71,7 @@ const ServicesList: React.FC = () => {
           services.map((service) => (
             <article
               key={service.id}
-              className="relative flex flex-col overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white p-8 shadow-[0_8px_24px_rgba(26,26,31,0.04)] transition-all hover:border-[#D4AF37]/50"
+              className="relative flex flex-col overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-[0_8px_24px_rgba(26,26,31,0.04)] transition-all hover:border-[#D4AF37]/50 sm:p-8"
             >
               <div className="absolute right-4 top-4 flex gap-2">
                 <span
@@ -115,7 +115,7 @@ const ServicesList: React.FC = () => {
         )}
         <button
           onClick={openModal}
-          className="group flex min-h-[260px] flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-[#D1D5DB] p-8 transition-all hover:border-[#D4AF37]/30 hover:bg-[#FBFCFD] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+          className="group flex min-h-52 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-[#D1D5DB] p-5 transition-all hover:border-[#D4AF37]/30 hover:bg-[#FBFCFD] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:min-h-[260px] sm:p-8"
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F3F4F6] transition-all group-hover:bg-[#D4AF37]">
             <span className="material-symbols-outlined text-2xl">add</span>

@@ -109,7 +109,7 @@ const ClientsList: React.FC = () => {
           <button
             type="button"
             onClick={openCreateModal}
-            className="min-h-11 rounded-full bg-[#D4AF37] px-6 py-3 text-sm font-semibold text-[#1A1A1F] transition-colors hover:bg-[#B99220] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+            className="min-h-11 w-full rounded-full bg-[#D4AF37] px-6 py-3 text-sm font-semibold text-[#1A1A1F] transition-colors hover:bg-[#B99220] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto"
           >
             Novo cliente
           </button>
@@ -167,7 +167,7 @@ const ClientsList: React.FC = () => {
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="grid gap-4 border-b border-transparent px-5 py-4 lg:grid-cols-[1.35fr_1fr_1fr_156px] lg:items-center"
+                className="grid gap-4 border-b border-transparent px-4 py-4 sm:px-5 lg:grid-cols-[1.35fr_1fr_1fr_156px] lg:items-center"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#F4D06F] bg-[#FFFAEB] text-[#8A6A11]">
@@ -178,26 +178,26 @@ const ClientsList: React.FC = () => {
                     <p className="text-xs text-[#6B7280]">Cliente da barbearia</p>
                   </div>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Telefone</p>
-                  <p className="text-sm text-[#4B5563]">{client.phone}</p>
+                  <p className="break-words text-sm text-[#4B5563]">{client.phone}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Email</p>
-                  <p className="text-sm text-[#4B5563]">{client.email || 'Não informado'}</p>
+                  <p className="break-words text-sm text-[#4B5563]">{client.email || 'Não informado'}</p>
                 </div>
-                <div className="flex gap-3 lg:justify-end">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3 lg:justify-end">
                   <button
                     type="button"
                     onClick={() => openEditModal(client)}
-                    className="min-h-11 rounded-full border border-[#D1D5DB] bg-white px-4 py-3 text-sm font-semibold text-[#1A1A1F] transition-colors hover:bg-[#F7F8FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+                    className="min-h-11 w-full rounded-full border border-[#D1D5DB] bg-white px-3 py-3 text-sm font-semibold text-[#1A1A1F] transition-colors hover:bg-[#F7F8FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto sm:px-4"
                   >
                     Editar
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(client.id)}
-                    className="min-h-11 rounded-full border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-sm font-semibold text-[#B42318] transition-colors hover:bg-[#FFF6F5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+                    className="min-h-11 w-full rounded-full border border-[#FECDCA] bg-[#FEF3F2] px-3 py-3 text-sm font-semibold text-[#B42318] transition-colors hover:bg-[#FFF6F5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto sm:px-4"
                   >
                     Excluir
                   </button>
@@ -254,18 +254,18 @@ const ClientsList: React.FC = () => {
             </div>
           ) : null}
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="sticky bottom-0 -mx-1 flex flex-col-reverse gap-3 border-t border-[#E5E7EB] bg-white px-1 pb-1 pt-4 sm:static sm:mx-0 sm:flex-row sm:justify-end sm:border-0 sm:p-0 sm:pt-2">
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="min-h-11 rounded-full border border-[#D1D5DB] bg-white px-5 py-3 text-sm font-semibold text-[#4B5563] transition-colors hover:bg-[#F7F8FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+              className="min-h-11 w-full rounded-full border border-[#D1D5DB] bg-white px-5 py-3 text-sm font-semibold text-[#4B5563] transition-colors hover:bg-[#F7F8FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={formLoading}
-              className="min-h-11 rounded-full bg-[#D4AF37] px-5 py-3 text-sm font-semibold text-[#1A1A1F] transition-colors hover:bg-[#B99220] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+              className="min-h-11 w-full rounded-full bg-[#D4AF37] px-5 py-3 text-sm font-semibold text-[#1A1A1F] transition-colors hover:bg-[#B99220] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto"
             >
               {formLoading ? 'Salvando...' : editingClient ? 'Salvar alterações' : 'Criar cliente'}
             </button>

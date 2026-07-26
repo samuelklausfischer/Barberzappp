@@ -15,45 +15,59 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ role, onLogout }) => 
 
   const closeMore = () => {
     setIsMoreOpen(false);
-    window.requestAnimationFrame(() => moreButtonRef.current?.focus());
   };
 
   return (
     <>
-      <nav className="bz-mobile-nav fixed inset-x-0 bottom-0 z-30 border-t border-[#E5E7EB] bg-white/95 px-2 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden" aria-label="Navegação mobile">
-        <div className="mx-auto flex h-full max-w-lg items-center justify-around gap-1">
+      <nav
+        className="bz-mobile-nav fixed inset-x-0 bottom-0 z-30 border-t border-[#E5E7EB] bg-white/95 px-1 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden"
+        aria-label="Navegação mobile"
+      >
+        <div className="bz-mobile-nav-content mx-auto flex max-w-lg items-center justify-around gap-0.5">
           {primaryItems.map((item) => (
             <NavLink
               key={item.id}
               to={item.path}
               end={item.path === '/'}
-              className={({ isActive }) => [
-                'flex min-h-11 min-w-[4.5rem] flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-[10px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37]',
-                isActive ? 'bg-[#D4AF37]/10 text-[#8B6B12]' : 'text-[#6B7280] hover:bg-[#F7F8FA] hover:text-[#1A1A1F]',
-              ].join(' ')}
+              className={({ isActive }) =>
+                [
+                  'flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-semibold leading-tight transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37]',
+                  isActive
+                    ? 'bg-[#D4AF37]/10 text-[#8B6B12]'
+                    : 'text-[#6B7280] hover:bg-[#F7F8FA] hover:text-[#1A1A1F]',
+                ].join(' ')
+              }
             >
-              <span className="material-symbols-outlined text-[21px]" aria-hidden="true">{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="material-symbols-outlined text-[21px]" aria-hidden="true">
+                {item.icon}
+              </span>
+              <span className="max-w-full truncate">{item.label}</span>
             </NavLink>
           ))}
           <button
             ref={moreButtonRef}
             type="button"
             onClick={() => setIsMoreOpen(true)}
-            className={`flex min-h-11 min-w-[4.5rem] flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-[10px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37] ${isMoreOpen ? 'bg-[#D4AF37]/10 text-[#8B6B12]' : 'text-[#6B7280] hover:bg-[#F7F8FA] hover:text-[#1A1A1F]'}`}
+            className={`flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-semibold leading-tight transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37] ${isMoreOpen ? 'bg-[#D4AF37]/10 text-[#8B6B12]' : 'text-[#6B7280] hover:bg-[#F7F8FA] hover:text-[#1A1A1F]'}`}
             aria-expanded={isMoreOpen}
             aria-controls="mobile-more-sheet"
             aria-label="Abrir mais opções"
           >
-            <span className="material-symbols-outlined text-[21px]" aria-hidden="true">more_horiz</span>
-            <span>Mais</span>
+            <span className="material-symbols-outlined text-[21px]" aria-hidden="true">
+              more_horiz
+            </span>
+            <span className="max-w-full truncate">Mais</span>
           </button>
         </div>
       </nav>
 
-      <div id="mobile-more-sheet">
-        <MobileMoreSheet role={role} isOpen={isMoreOpen} onClose={closeMore} onLogout={onLogout} />
-      </div>
+      <MobileMoreSheet
+        role={role}
+        isOpen={isMoreOpen}
+        onClose={closeMore}
+        onLogout={onLogout}
+        returnFocusRef={moreButtonRef}
+      />
     </>
   );
 };

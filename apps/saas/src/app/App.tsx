@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layout/Sidebar';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import AccountMenu from '@/components/layout/AccountMenu';
 import NotificationMenu from '@/components/layout/NotificationMenu';
+import BarberZapLogo from '@/components/ui/BarberZapLogo';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import SubscriptionPaused from '@/components/auth/SubscriptionPaused';
 import { LoadingSkeleton } from '@/components/ui/Skeleton';
@@ -14,6 +15,7 @@ import { useSidebarStore } from '@/stores/sidebarStore';
 const AppLayout: React.FC = () => {
   const { user, profile, tenant, membership, loading, signOut, accessState } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isSidebarCollapsed = useSidebarStore((state) => state.isCollapsed);
   const toggleSidebar = useSidebarStore((state) => state.toggle);
   const [activeMenu, setActiveMenu] = useState<'notifications' | 'account' | null>(null);
@@ -28,6 +30,10 @@ const AppLayout: React.FC = () => {
     window.addEventListener('keydown', handleShortcut);
     return () => window.removeEventListener('keydown', handleShortcut);
   }, [toggleSidebar]);
+
+  useEffect(() => {
+    setActiveMenu(null);
+  }, [location.pathname]);
 
   if (loading) {
     return (
@@ -49,11 +55,11 @@ const AppLayout: React.FC = () => {
   const timeZone = resolveAgendaTimeZone(tenant.timezone);
 
   return (
-    <div className="bz-app-bg flex min-h-screen overflow-hidden">
+    <div className="bz-app-bg flex h-[100dvh] overflow-hidden md:h-auto md:min-h-screen">
       <Sidebar role={membership.role} onLogout={handleLogout} />
       <MobileBottomNav role={membership.role} onLogout={handleLogout} />
 
-      <main className="flex-1 overflow-y-auto scrollbar-hide">
+      <main className="h-[100dvh] min-w-0 flex-1 overflow-y-auto overscroll-y-contain scrollbar-hide md:h-auto md:min-h-screen">
         <header className="sticky top-0 z-20 border-b border-[#E5E7EB]/90 bg-white/90 px-4 py-3 backdrop-blur-xl sm:px-5 lg:px-7">
           <div className="flex min-h-11 items-center justify-between gap-3">
             <button
@@ -65,8 +71,18 @@ const AppLayout: React.FC = () => {
               aria-label={isSidebarCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
               title={`${isSidebarCollapsed ? 'Expandir' : 'Recolher'} barra lateral (Ctrl/Cmd+B)`}
             >
-              <span className="material-symbols-outlined text-[22px]" aria-hidden="true">menu</span>
+              <span className="material-symbols-outlined text-[22px]" aria-hidden="true">
+                menu
+              </span>
             </button>
+            <div className="w-32 overflow-visible md:hidden">
+              <BarberZapLogo
+                compact
+                label="BarberZap"
+                tone="light"
+                className="origin-left scale-[0.72]"
+              />
+            </div>
             <div className="ml-auto flex items-center gap-2.5">
               <NotificationMenu
                 isOpen={activeMenu === 'notifications'}
@@ -90,7 +106,7 @@ const AppLayout: React.FC = () => {
           </div>
         </header>
 
-        <div className="bz-page-shell px-4 py-5 pb-24 sm:px-5 lg:px-7 md:pb-5">
+        <div className="bz-page-shell px-4 py-5 pb-[calc(var(--bz-mobile-nav-height)+1rem)] sm:px-5 lg:px-7 md:pb-5">
           <Outlet context={{ tenant, membership, profile }} />
         </div>
       </main>

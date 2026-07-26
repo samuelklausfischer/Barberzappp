@@ -96,7 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
   const sizeClasses = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6"
       role="presentation"
     >
       <button
@@ -109,12 +109,12 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className={`relative flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-y-auto rounded-2xl border border-[#E5E7EB] bg-white shadow-2xl shadow-[#1A1A1F]/15 sm:max-h-[calc(100vh-3rem)] sm:rounded-3xl ${sizeClasses[size]}`}
+        className={`relative flex max-h-[100dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-[28px] border border-[#E5E7EB] bg-white shadow-2xl shadow-[#1A1A1F]/15 sm:max-h-[calc(100vh-3rem)] sm:rounded-3xl ${sizeClasses[size]}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <div className="flex items-center justify-between gap-4 border-b border-[#E5E7EB] px-5 py-4 sm:px-6">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-[#E5E7EB] bg-white px-5 py-4 sm:px-6">
           <div>
             {eyebrow ? (
               <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#6B7280]">
@@ -138,7 +138,9 @@ export const Modal: React.FC<ModalProps> = ({
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
-        <div className="px-5 py-5 sm:px-6 sm:py-6">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6">
+          {children}
+        </div>
       </div>
     </div>
   );

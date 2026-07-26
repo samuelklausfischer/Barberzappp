@@ -102,7 +102,7 @@ export const ServiceFormModal: React.FC<Props> = ({
       eyebrow="Catálogo da barbearia"
       size="lg"
     >
-      <form className="space-y-5" onSubmit={(event) => void submit(event)} aria-busy={creating}>
+      <form className="space-y-4 sm:space-y-5" onSubmit={(event) => void submit(event)} aria-busy={creating}>
         <p className="text-sm leading-6 text-[#6B7280]">
           Escolha uma sugestão comum ou crie seu serviço do zero. Todos os valores podem ser
           ajustados antes de salvar.
@@ -319,19 +319,19 @@ export const ServiceFormModal: React.FC<Props> = ({
             </span>
           </span>
         </label>
-        <div className="flex flex-col-reverse gap-3 border-t border-[#E5E7EB] pt-5 sm:flex-row sm:justify-end">
+        <div className="sticky bottom-0 -mx-1 flex flex-col-reverse gap-3 border-t border-[#E5E7EB] bg-white px-1 pb-1 pt-4 sm:static sm:mx-0 sm:flex-row sm:justify-end sm:p-0 sm:pt-5">
           <button
             type="button"
             onClick={close}
             disabled={creating}
-            className="min-h-11 rounded-full border border-[#D1D5DB] px-5 py-3 text-sm font-semibold text-[#4B5563] hover:bg-[#F7F8FA] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+            className="min-h-11 w-full rounded-full border border-[#D1D5DB] px-5 py-3 text-sm font-semibold text-[#4B5563] hover:bg-[#F7F8FA] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={creating}
-            className="min-h-11 rounded-full bg-[#D4AF37] px-5 py-3 text-sm font-semibold text-[#1A1A1F] hover:bg-[#B99220] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
+            className="min-h-11 w-full rounded-full bg-[#D4AF37] px-5 py-3 text-sm font-semibold text-[#1A1A1F] hover:bg-[#B99220] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 sm:w-auto"
           >
             {creating ? 'Salvando…' : 'Salvar serviço'}
           </button>

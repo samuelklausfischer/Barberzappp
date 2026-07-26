@@ -140,7 +140,7 @@ const TeamForm: React.FC<{
             {periodsFor(draft.schedule, day).map((period, index) => {
               const position = draft.schedule.indexOf(period);
               return (
-                <div key={`${day}-${index}`} className="mb-2 grid grid-cols-[1fr_1fr_auto] gap-2">
+                <div key={`${day}-${index}`} className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_auto]">
                   <input
                     aria-label={`${label} início ${index + 1}`}
                     type="time"
@@ -170,14 +170,15 @@ const TeamForm: React.FC<{
                   <button
                     aria-label={`Remover período de ${label}`}
                     type="button"
-                    className="min-h-11 rounded-xl px-2 text-[#B42318]"
+                    className="col-span-2 min-h-11 rounded-xl border border-[#FECDCA] px-3 text-sm font-semibold text-[#B42318] sm:col-span-1 sm:border-0 sm:px-2 sm:text-base"
                     onClick={() =>
                       updateSchedule(
                         draft.schedule.filter((_, itemIndex) => itemIndex !== position)
                       )
                     }
                   >
-                    <span className="material-symbols-outlined">delete</span>
+                    <span className="material-symbols-outlined align-middle">delete</span>
+                    <span className="ml-1 sm:hidden">Remover período</span>
                   </button>
                 </div>
               );
@@ -185,16 +186,16 @@ const TeamForm: React.FC<{
           </div>
         ))}
       </fieldset>
-      <div className="flex flex-col-reverse gap-3 border-t border-[#E5E7EB] pt-5 sm:flex-row sm:justify-end">
+      <div className="sticky bottom-0 -mx-1 flex flex-col-reverse gap-3 border-t border-[#E5E7EB] bg-white px-1 pb-1 pt-4 sm:static sm:mx-0 sm:flex-row sm:justify-end sm:p-0 sm:pt-5">
         <button
           type="button"
-          className="min-h-11 rounded-full border border-[#D1D5DB] px-5 py-3 text-sm font-semibold"
+          className="min-h-11 w-full rounded-full border border-[#D1D5DB] px-5 py-3 text-sm font-semibold sm:w-auto"
           onClick={onClose}
           disabled={busy}
         >
           Cancelar
         </button>
-        <button type="submit" className={primary} disabled={busy}>
+        <button type="submit" className={`${primary} w-full sm:w-auto`} disabled={busy}>
           {busy ? 'Salvando…' : 'Salvar profissional'}
         </button>
       </div>
@@ -261,7 +262,7 @@ const TeamSettings: React.FC = () => {
         actions={
           <Link
             to="/settings"
-            className="min-h-11 rounded-full border border-[#D1D5DB] px-5 py-3 text-sm font-semibold text-[#4B5563]"
+            className="min-h-11 w-full rounded-full border border-[#D1D5DB] px-5 py-3 text-center text-sm font-semibold text-[#4B5563] sm:w-auto"
           >
             Voltar aos ajustes
           </Link>
@@ -302,7 +303,7 @@ const TeamSettings: React.FC = () => {
             <option value="active">Ativos</option>
             <option value="inactive">Inativos</option>
           </select>
-          <button className={primary} onClick={() => setEditing(null)}>
+          <button className={`${primary} w-full lg:w-auto`} onClick={() => setEditing(null)}>
             Adicionar profissional
           </button>
         </div>
@@ -338,8 +339,8 @@ const TeamSettings: React.FC = () => {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {visible.map((member) => (
-            <Panel key={member.id} className="p-5">
-              <div className="flex items-start justify-between gap-3">
+            <Panel key={member.id} className="p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-[#1A1A1F]">{member.name}</h2>
                   <p className="mt-1 text-sm text-[#6B7280]">
@@ -358,7 +359,7 @@ const TeamSettings: React.FC = () => {
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <button
-                  className="min-h-11 rounded-full border border-[#D1D5DB] px-4 text-sm font-semibold"
+                  className="min-h-11 flex-1 rounded-full border border-[#D1D5DB] px-4 text-sm font-semibold sm:flex-none"
                   disabled={busy}
                   onClick={() => setEditing(member)}
                 >
@@ -366,7 +367,7 @@ const TeamSettings: React.FC = () => {
                 </button>
                 {member.active ? (
                   <button
-                    className="min-h-11 rounded-full border border-[#D4AF37]/50 px-4 text-sm font-semibold text-[#8B6B12]"
+                    className="min-h-11 flex-1 rounded-full border border-[#D4AF37]/50 px-4 text-sm font-semibold text-[#8B6B12] sm:flex-none"
                     disabled={busy}
                     onClick={() => setConfirmInactive(member)}
                   >
@@ -374,7 +375,7 @@ const TeamSettings: React.FC = () => {
                   </button>
                 ) : (
                   <button
-                    className="min-h-11 rounded-full border border-[#D1D5DB] px-4 text-sm font-semibold"
+                    className="min-h-11 flex-1 rounded-full border border-[#D1D5DB] px-4 text-sm font-semibold sm:flex-none"
                     disabled={busy}
                     onClick={() =>
                       void run(async () => setActive(member, true), `${member.name} foi reativado.`)
@@ -384,7 +385,7 @@ const TeamSettings: React.FC = () => {
                   </button>
                 )}
                 <button
-                  className="min-h-11 rounded-full px-3 text-sm font-semibold text-[#B42318]"
+                  className="min-h-11 w-full rounded-full border border-[#FECDCA] px-3 text-sm font-semibold text-[#B42318] sm:w-auto sm:border-0"
                   disabled={busy}
                   onClick={() => {
                     setDeleting(member);
@@ -458,16 +459,16 @@ const TeamSettings: React.FC = () => {
             onChange={(e) => setTypedName(e.target.value)}
           />
         </label>
-        <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <div className="sticky bottom-0 -mx-1 mt-5 flex flex-col-reverse gap-3 border-t border-[#E5E7EB] bg-white px-1 pb-1 pt-4 sm:static sm:mx-0 sm:flex-row sm:justify-end sm:border-0 sm:p-0 sm:pt-0">
           <button
-            className="min-h-11 rounded-full border border-[#D1D5DB] px-5 text-sm font-semibold"
+            className="min-h-11 w-full rounded-full border border-[#D1D5DB] px-5 text-sm font-semibold sm:w-auto"
             disabled={busy}
             onClick={() => setDeleting(null)}
           >
             Cancelar
           </button>
           <button
-            className="min-h-11 rounded-full bg-[#B42318] px-5 text-sm font-semibold text-white disabled:opacity-50"
+            className="min-h-11 w-full rounded-full bg-[#B42318] px-5 text-sm font-semibold text-white disabled:opacity-50 sm:w-auto"
             disabled={busy || typedName !== deleting?.name}
             onClick={() =>
               void run(
