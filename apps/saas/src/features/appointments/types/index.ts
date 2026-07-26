@@ -31,6 +31,7 @@ export interface AgendaAppointmentService {
   name: string | null;
   description: string | null;
   durationMinutes: number | null;
+  price: number | null;
 }
 
 export interface AgendaAppointmentProfessional {
@@ -56,5 +57,6 @@ export interface AgendaAppointment {
   serviceName: string | null;
   client: AgendaAppointmentClient | null;
   service: AgendaAppointmentService | null;
+  services: AgendaAppointmentService[];
   professional: AgendaAppointmentProfessional | null;
 }

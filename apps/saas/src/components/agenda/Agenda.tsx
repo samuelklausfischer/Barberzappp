@@ -16,6 +16,7 @@ import {
 } from '@/features/appointments/utils/agendaDateRange';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { getTimelineItems, type TimelineItem } from './agendaTimeline';
+import { NewAppointmentModal } from './NewAppointmentModal';
 
 type AgendaView = 'timeline' | 'list' | 'cards';
 
@@ -109,6 +110,8 @@ const Agenda: React.FC = () => {
   const selectedDate = isCalendarDate(dateParam) ? dateParam : today;
   const view = isAgendaView(requestedView) ? requestedView : fallbackView;
   const [selectedAppointment, setSelectedAppointment] = useState<AgendaAppointment | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [creationNotice, setCreationNotice] = useState<string | null>(null);
   const { appointments, loading, error, refresh } = useAgendaAppointments({
     date: selectedDate,
     timeZone: TIME_ZONE,
@@ -174,13 +177,11 @@ const Agenda: React.FC = () => {
         actions={
           <button
             type="button"
-            disabled
-            title="Em breve"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#D4AF37] px-4 py-2.5 text-sm font-semibold text-[#1A1A1F] shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={() => { setCreationNotice(null); setIsCreateModalOpen(true); }}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#D4AF37] px-4 py-2.5 text-sm font-semibold text-[#1A1A1F] shadow-sm transition-colors hover:bg-[#B99220] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"
           >
             <span className="material-symbols-outlined text-[19px]">add</span>
             Novo agendamento
-            <span className="text-xs font-medium">Em breve</span>
           </button>
         }
       />
@@ -264,6 +265,7 @@ const Agenda: React.FC = () => {
         <MetricCard icon="schedule" label="Pendentes" value={loading ? '—' : metrics.pending} detail="Aguardando confirmação" />
         <MetricCard icon="payments" label="Faturamento" value={loading ? '—' : formatCurrency(metrics.revenue)} detail="Estimativa sem cancelados e faltas" accent="neutral" />
       </div>
+      {creationNotice ? <div role="status" className="rounded-xl border border-[#A6F4C5] bg-[#ECFDF3] px-4 py-3 text-sm font-medium text-[#067647]">{creationNotice}</div> : null}
 
       {loading ? (
         <Panel className="px-5 py-12 text-center" aria-live="polite">
@@ -301,6 +303,19 @@ const Agenda: React.FC = () => {
       )}
 
       <AppointmentDetailsModal appointment={selectedAppointment} onClose={() => setSelectedAppointment(null)} />
+      {isCreateModalOpen ? <NewAppointmentModal
+        isOpen={isCreateModalOpen}
+        date={selectedDate}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreated={async (createdDate) => {
+          if (createdDate === selectedDate) {
+            await refresh();
+          } else {
+            updateDate(createdDate);
+          }
+          setCreationNotice(`Agendamento criado para ${createdDate.split('-').reverse().join('/')}.`);
+        }}
+      /> : null}
     </div>
   );
 };
@@ -460,10 +475,11 @@ const AppointmentDetailsModal: React.FC<{ appointment: AgendaAppointment | null;
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <Detail icon="person" label="Cliente"><p className="font-semibold">{appointment.clientName ?? 'Não informado'}</p><p className="text-[#6B7280]">{contact || 'Contato não informado'}</p></Detail>
-          <Detail icon="content_cut" label="Serviço"><p className="font-semibold">{appointment.serviceName ?? 'Não informado'}</p><p className="text-[#6B7280]">{formatCurrency(appointment.price)}</p></Detail>
+          <Detail icon="content_cut" label="Serviços"><p className="font-semibold">{appointment.serviceName ?? 'Não informado'}</p><p className="text-[#6B7280]">{formatCurrency(appointment.price)}</p></Detail>
           <Detail icon="schedule" label="Horário"><p className="font-semibold">{formatTime(appointment.startsAt)}{appointment.endsAt ? ` às ${formatTime(appointment.endsAt)}` : ''}</p><p className="text-[#6B7280]">{durationLabel(appointment.durationMinutes)}</p></Detail>
           <Detail icon="badge" label="Profissional"><p className="font-semibold">{appointment.professional?.name ?? 'Não informado'}</p><p className="text-[#6B7280]">{appointment.professional?.kind === 'barber' ? 'Barbeiro' : appointment.professional?.kind === 'employee' ? 'Colaborador' : 'Sem vínculo informado'}</p></Detail>
         </div>
+        {appointment.services.length > 1 ? <Detail icon="format_list_bulleted" label="Composição dos serviços"><ul className="space-y-1.5">{appointment.services.map((service) => <li key={service.id}>{service.name ?? 'Serviço sem nome'}{service.durationMinutes ? <span className="text-[#6B7280]"> · {durationLabel(service.durationMinutes)}</span> : null}{service.price !== null ? <span className="text-[#6B7280]"> · {formatCurrency(service.price)}</span> : null}</li>)}</ul></Detail> : null}
         <Detail icon="notes" label="Observação"><p className="whitespace-pre-wrap text-[#4B5563]">{appointment.observation?.trim() || 'Nenhuma observação registrada.'}</p></Detail>
         <p className="text-center text-xs text-[#6B7280]">Visualização somente leitura.</p>
       </div>

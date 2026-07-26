@@ -27,6 +27,7 @@ type AgendaAppointmentRow = {
   services: RelatedRow;
   barbers: RelatedRow;
   employees: RelatedRow;
+  appointment_services: RelatedRow;
 };
 
 const firstRelation = (value: RelatedRow) => (Array.isArray(value) ? value[0] ?? null : value);
@@ -92,7 +93,28 @@ const mapService = (relation: RelatedRow): AgendaAppointmentService | null => {
     name: asString(service.name),
     description: asString(service.description),
     durationMinutes: asPositiveNumber(service.duration_minutes) ?? asPositiveNumber(service.duration),
+    price: asNumber(service.price),
   };
+};
+
+const mapServices = (relation: RelatedRow): AgendaAppointmentService[] => {
+  const rows = Array.isArray(relation) ? relation : relation ? [relation] : [];
+  return rows
+    .map((service) => {
+      const id = asId(service.service_id) ?? asId(service.id);
+      if (!id) return null;
+      return {
+        id,
+        name: asString(service.service_name) ?? asString(service.name),
+        description: asString(service.description),
+        durationMinutes: asPositiveNumber(service.duration_minutes) ?? asPositiveNumber(service.duration),
+        price: asNumber(service.unit_price) ?? asNumber(service.price),
+        position: asNumber(service.position) ?? Number.MAX_SAFE_INTEGER,
+      };
+    })
+    .filter((service): service is AgendaAppointmentService & { position: number } => service !== null)
+    .sort((first, second) => first.position - second.position)
+    .map(({ position: _position, ...service }) => service);
 };
 
 const mapProfessional = (
@@ -121,7 +143,9 @@ export const mapAgendaAppointment = (row: AgendaAppointmentRow): AgendaAppointme
   if (!row.tenant_id || !startsAt || Number.isNaN(new Date(startsAt).getTime())) return null;
 
   const client = mapClient(row.clients);
-  const service = mapService(row.services);
+  const legacyService = mapService(row.services);
+  const services = mapServices(row.appointment_services);
+  const service = services[0] ?? legacyService;
   const endsAt = row.end_time && !Number.isNaN(new Date(row.end_time).getTime()) ? row.end_time : null;
 
   return {
@@ -129,14 +153,23 @@ export const mapAgendaAppointment = (row: AgendaAppointmentRow): AgendaAppointme
     tenantId: row.tenant_id,
     startsAt,
     endsAt,
-    durationMinutes: calculateDurationMinutes(startsAt, endsAt) ?? service?.durationMinutes ?? null,
+    durationMinutes:
+      calculateDurationMinutes(startsAt, endsAt) ??
+      (services.length > 0
+        ? services.reduce((total, serviceItem) => total + (serviceItem.durationMinutes ?? 0), 0) || null
+        : service?.durationMinutes ?? null),
     status: mapStatus(row.status),
     price: asNumber(row.price),
     observation: row.observation,
     clientName: client?.name ?? row.client_name ?? null,
-    serviceName: service?.name ?? row.service_type ?? null,
+    serviceName:
+      services.map((serviceItem) => serviceItem.name).filter(Boolean).join(' + ') ||
+      service?.name ||
+      row.service_type ||
+      null,
     client,
     service,
+    services,
     professional: mapProfessional(row.barbers, row.employees),
   };
 };
@@ -197,7 +230,7 @@ export const useAgendaAppointments = ({
       const { data, error: fetchError } = await supabase
         .from('appointments')
         .select(
-          'id, tenant_id, client_name, service_type, scheduled_at, start_time, end_time, status, price, observation, clients:clients!appointments_client_id_fkey(id, name, phone, phone_number, email, avatar_url), services:services!appointments_service_id_fkey(id, name, description, duration, duration_minutes), barbers:barbers!appointments_barber_id_fkey(id, name), employees:employees!appointments_employee_id_fkey(id, name)'
+          'id, tenant_id, client_name, service_type, scheduled_at, start_time, end_time, status, price, observation, clients:clients!appointments_client_id_fkey(id, name, phone, phone_number, email, avatar_url), services:services!appointments_service_id_fkey(id, name, description, duration, duration_minutes, price), appointment_services(id, service_id, service_name, duration_minutes, unit_price, position), barbers:barbers!appointments_barber_id_fkey(id, name), employees:employees!appointments_employee_id_fkey(id, name)'
         )
         .eq('tenant_id', tenantId)
         .gte('scheduled_at', range.startsAt)

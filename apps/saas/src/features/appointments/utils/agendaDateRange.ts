@@ -108,3 +108,20 @@ export const getAgendaDayRange = (date: string, timeZone = DEFAULT_AGENDA_TIME_Z
     endsAt: endsAt.toISOString(),
   };
 };
+
+/** Converts a calendar date and wall-clock time in the agenda timezone to an ISO instant. */
+export const getAgendaDateTime = (
+  date: string,
+  time: string,
+  timeZone = DEFAULT_AGENDA_TIME_ZONE
+) => {
+  if (!/^\d{2}:\d{2}$/.test(time)) {
+    throw new Error('O hor\u00e1rio da agenda deve usar o formato HH:MM.');
+  }
+
+  const [hour, minute] = time.split(':').map(Number);
+  if (hour > 23 || minute > 59) throw new Error('O hor\u00e1rio da agenda n\u00e3o \u00e9 v\u00e1lido.');
+
+  const startOfDay = new Date(getAgendaDayRange(date, timeZone).startsAt);
+  return new Date(startOfDay.getTime() + (hour * 60 + minute) * 60_000).toISOString();
+};
