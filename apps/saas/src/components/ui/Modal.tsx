@@ -1,4 +1,4 @@
-import React, { useEffect, useId } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -6,25 +6,93 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg';
+  eyebrow?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+const focusableSelector = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', eyebrow = 'Edição guiada' }) => {
   const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!isOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+
+    previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+    const focusInitialElement = () => closeButtonRef.current?.focus();
+    const animationFrame = window.requestAnimationFrame(focusInitialElement);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(focusableSelector) ?? []
+      ) as HTMLElement[];
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialogRef.current?.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!dialogRef.current?.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+        return;
+      }
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+      previouslyFocusedRef.current?.focus();
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
   const sizeClasses = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl' };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="presentation">
-      <button type="button" aria-label="Fechar modal" className="absolute inset-0 cursor-default bg-[#1A1A1F]/35 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-y-auto rounded-2xl border border-[#E5E7EB] bg-white shadow-2xl shadow-[#1A1A1F]/15 sm:max-h-[calc(100vh-3rem)] sm:rounded-3xl ${sizeClasses[size]}`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <button type="button" tabIndex={-1} aria-label="Fechar modal" className="absolute inset-0 cursor-default bg-[#1A1A1F]/35 backdrop-blur-sm" onClick={onClose} />
+      <div ref={dialogRef} tabIndex={-1} className={`relative flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-y-auto rounded-2xl border border-[#E5E7EB] bg-white shadow-2xl shadow-[#1A1A1F]/15 sm:max-h-[calc(100vh-3rem)] sm:rounded-3xl ${sizeClasses[size]}`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="flex items-center justify-between gap-4 border-b border-[#E5E7EB] px-5 py-4 sm:px-6">
-          <div><p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#6B7280]">Edicao guiada</p><h2 id={titleId} className="text-xl font-semibold leading-tight text-[#1A1A1F] sm:text-2xl">{title}</h2></div>
-          <button type="button" onClick={onClose} aria-label="Fechar modal" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F7F8FA] hover:text-[#1A1A1F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"><span className="material-symbols-outlined">close</span></button>
+          <div>{eyebrow ? <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#6B7280]">{eyebrow}</p> : null}<h2 id={titleId} className="text-xl font-semibold leading-tight text-[#1A1A1F] sm:text-2xl">{title}</h2></div>
+          <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Fechar modal" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F7F8FA] hover:text-[#1A1A1F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50"><span className="material-symbols-outlined">close</span></button>
         </div>
         <div className="px-5 py-5 sm:px-6 sm:py-6">{children}</div>
       </div>
