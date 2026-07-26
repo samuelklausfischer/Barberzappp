@@ -13,6 +13,7 @@
     "typecheck:app": "tsc -p tsconfig.app.json",
     "test:agenda": "node --test --test-isolation=none --experimental-strip-types tests/unit/agendaDateRange.test.ts tests/unit/agendaTimeline.test.ts",
     "test:services": "node --test --test-isolation=none --experimental-strip-types tests/unit/serviceDraft.test.ts",
+    "test:notifications": "node --test --test-isolation=none --experimental-strip-types tests/unit/appointmentNotifications.test.ts",
     "test:team": "node --test --test-isolation=none --experimental-strip-types tests/unit/teamSchedule.test.ts",
     "preview": "vite preview",
     "test:load:setup": "k6 run tests/load/setup.js",

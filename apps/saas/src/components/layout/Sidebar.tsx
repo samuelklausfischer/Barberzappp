@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { AppRole, getNavigationGroupsForRole } from '@/config/routes';
 import { useSidebarStore } from '@/stores/sidebarStore';
@@ -11,20 +11,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ role, onLogout }) => {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed);
-  const toggle = useSidebarStore((state) => state.toggle);
   const groups = getNavigationGroupsForRole(role);
-
-  useEffect(() => {
-    const handleShortcut = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'b') {
-        event.preventDefault();
-        toggle();
-      }
-    };
-
-    window.addEventListener('keydown', handleShortcut);
-    return () => window.removeEventListener('keydown', handleShortcut);
-  }, [toggle]);
 
   return (
     <aside
@@ -33,27 +20,12 @@ const Sidebar: React.FC<SidebarProps> = ({ role, onLogout }) => {
     >
       <div className="flex min-h-0 flex-1 flex-col">
         <div className={`border-b border-[#E5E7EB] py-5 ${isCollapsed ? 'px-3' : 'px-5'}`}>
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between gap-2'}`}>
-            <BarberZapLogo
-              compact
-              label={isCollapsed ? undefined : 'BarberZap'}
-              tone="light"
-              className={isCollapsed ? 'justify-center [&>div:last-child]:hidden' : 'min-w-0 gap-2'}
-            />
-            <button
-              type="button"
-              onClick={toggle}
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[#6B7280] transition-colors hover:bg-[#F7F8FA] hover:text-[#1A1A1F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D4AF37] ${isCollapsed ? 'absolute left-[4.75rem] top-4' : ''}`}
-              aria-expanded={!isCollapsed}
-              aria-controls="saas-sidebar-navigation"
-              aria-label={isCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
-              title={isCollapsed ? 'Expandir barra lateral (Ctrl/Cmd+B)' : 'Recolher barra lateral (Ctrl/Cmd+B)'}
-            >
-              <span className="material-symbols-outlined text-[21px]" aria-hidden="true">
-                {isCollapsed ? 'chevron_right' : 'chevron_left'}
-              </span>
-            </button>
-          </div>
+          <BarberZapLogo
+            compact
+            label={isCollapsed ? undefined : 'BarberZap'}
+            tone="light"
+            className={isCollapsed ? 'justify-center [&>div:last-child]:hidden' : 'min-w-0 gap-2'}
+          />
         </div>
 
         <nav id="saas-sidebar-navigation" className="min-h-0 flex-1 overflow-y-auto px-3 py-5" aria-label="Navegação principal">
