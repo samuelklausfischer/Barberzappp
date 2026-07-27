@@ -62,28 +62,26 @@ const Login: React.FC = () => {
 
           <div className="bz-login-reveal bz-login-reveal-delay my-12 max-w-[720px]">
             <p className="bz-kicker mb-5 text-[#956a16]">BarberZap para barbearias em movimento</p>
-            <h1 className="bz-title-serif max-w-[680px] text-[clamp(3.7rem,6vw,7.2rem)] font-semibold leading-[0.86] tracking-[-0.045em] text-[#1b1712]">
+            <h1 className="bz-title-serif max-w-[680px] text-[clamp(3.25rem,5vw,5.4rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-[#1b1712]">
               Sua barbearia no ritmo certo.
             </h1>
-            <p className="mt-7 max-w-[590px] text-base leading-7 text-[#655c50] xl:text-lg xl:leading-8">
+            <p className="mt-6 max-w-[560px] text-[15px] leading-7 text-[#655c50] xl:text-base xl:leading-8">
               Agenda, clientes e operação em um só lugar para você dedicar mais tempo ao atendimento e menos à rotina administrativa.
             </p>
-
-            <div className="mt-10 grid gap-3 xl:grid-cols-3">
-              {benefits.map((benefit) => (
-                <article
-                  key={benefit.title}
-                  className="bz-login-benefit rounded-[22px] border border-[#9f7a2c]/[0.16] bg-white/55 p-5 shadow-[0_14px_35px_rgba(84,62,25,0.06)]"
-                >
-                  <span className="material-symbols-outlined text-[24px] text-[#a97918]" aria-hidden="true">
-                    {benefit.icon}
-                  </span>
-                  <h2 className="mt-4 text-sm font-bold text-[#2a231b]">{benefit.title}</h2>
-                  <p className="mt-2 text-xs leading-5 text-[#756b5e]">{benefit.description}</p>
-                </article>
-              ))}
+              <div className="bz-login-feature-panel mt-9 max-w-[600px]">
+                {benefits.map((benefit) => (
+                  <article key={benefit.title} className="bz-login-feature-row group flex items-start gap-4 px-1 py-3.5">
+                    <span className="bz-login-feature-icon material-symbols-outlined" aria-hidden="true">
+                      {benefit.icon}
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="text-sm font-semibold text-[#2a231b]">{benefit.title}</h2>
+                      <p className="mt-1 text-xs leading-5 text-[#756b5e]">{benefit.description}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
 
           <div className="bz-login-reveal bz-login-reveal-delay-2 flex items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#756a5d]">
             <span>Faça parte do BarberZap</span>
@@ -104,7 +102,7 @@ const Login: React.FC = () => {
             </div>
 
             <div className="bz-login-card rounded-[28px] border border-[#9f7a2c]/[0.18] px-5 py-6 sm:rounded-[32px] sm:px-8 sm:py-8 xl:px-10 xl:py-9">
-              <header className="mb-7">
+              <header className="mb-8">
                 <div className="mb-5 flex items-center justify-between gap-4">
                   <p className="bz-kicker text-[#956a16]">Acesso ao painel</p>
                   <span className="flex items-center gap-2 text-[10px] font-semibold text-[#8b6b2c]">
@@ -112,7 +110,7 @@ const Login: React.FC = () => {
                     Conexão protegida
                   </span>
                 </div>
-                <h1 className="bz-title-serif text-[clamp(2.7rem,5vw,4rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-[#1c1712]">
+                <h1 className="bz-title-serif text-[clamp(2.35rem,4vw,3.35rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-[#1c1712]">
                   Bem-vindo de volta.
                 </h1>
                 <p className="mt-3 max-w-md text-sm leading-6 text-[#6d6255]">
@@ -218,23 +216,23 @@ const Login: React.FC = () => {
                   {loading ? 'Entrando...' : 'Entrar no BarberZap'}
                 </button>
               </form>
-
-              <div className="mt-7 rounded-[22px] border border-[#b8861d]/25 bg-[#fffaf0] p-4 shadow-[0_12px_30px_rgba(151,112,7,0.08)] sm:flex sm:items-center sm:justify-between sm:gap-5 sm:p-5">
+              <div className="bz-login-trial mt-7 flex flex-col gap-4 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:p-5">
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-[#2a231b]">Ainda não faz parte do BarberZap?</p>
-                  <p className="mt-1 text-xs leading-5 text-[#756b5e]">
-                    Teste o painel por 7 dias e descubra uma rotina mais simples.
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="bz-login-trial-eyebrow">Novas barbearias</span>
+                    <span className="bz-login-trial-badge">7 dias grátis</span>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-[#2a231b]">Uma semana para sentir a diferença.</p>
+                  <p className="mt-1 text-xs leading-5 text-[#756b5e]">Sem compromisso. Cancele quando quiser.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => navigate('/cadastro')}
-                  className="mt-4 flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#b8861d]/35 bg-[#f3d98a]/35 px-4 text-[10px] font-bold uppercase tracking-[0.13em] text-[#76530a] transition-colors hover:bg-[#f3d98a]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8861d]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf0] sm:mt-0 sm:w-auto"
+                  className="bz-login-trial-button flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl px-4 text-[10px] font-bold uppercase tracking-[0.13em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8861d]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf0] sm:w-auto"
                 >
-                  Começar teste grátis
+                  Começar teste
                 </button>
               </div>
-              <p className="mt-3 text-center text-[10px] text-[#8c8174]">Sem compromisso. Cancele quando quiser.</p>
             </div>
 
             <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-[#8c8174] lg:absolute lg:inset-x-0 lg:bottom-6 lg:mt-0">
