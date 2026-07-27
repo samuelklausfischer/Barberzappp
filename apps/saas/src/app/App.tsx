@@ -13,7 +13,7 @@ import { resolveAgendaTimeZone } from '@/config/timeZone';
 import { useSidebarStore } from '@/stores/sidebarStore';
 
 const AppLayout: React.FC = () => {
-  const { user, profile, tenant, membership, loading, signOut, accessState } = useAuth();
+  const { user, profile, tenant, membership, loading, signOut, accessState, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isSidebarCollapsed = useSidebarStore((state) => state.isCollapsed);
@@ -43,6 +43,7 @@ const AppLayout: React.FC = () => {
     );
   }
 
+  if (isAdmin) return <Navigate to={APP_PATHS.ADMIN} replace />;
   if (!user || !membership || !tenant) return <Navigate to={APP_PATHS.LOGIN} replace />;
   if (accessState === 'paused') return <SubscriptionPaused />;
 

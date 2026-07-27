@@ -40,8 +40,8 @@ const Login: React.FC = () => {
     setLocalError(null);
 
     try {
-      await signIn(email, password);
-      navigate('/', { replace: true });
+      const result = await signIn(email, password);
+      navigate(result.user.app_metadata?.role === 'admin' ? '/admin' : '/', { replace: true });
     } catch (loginError) {
       setLocalError(loginError instanceof Error ? loginError.message : 'Erro ao fazer login');
     }
