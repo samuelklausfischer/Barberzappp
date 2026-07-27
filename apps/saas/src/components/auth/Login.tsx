@@ -50,14 +50,14 @@ const Login: React.FC = () => {
   const displayError = localError || error;
 
   return (
-    <main className="bz-login-page relative isolate min-h-[100dvh] overflow-x-hidden text-[#211b14]">
+    <main className="bz-login-page relative isolate min-h-[100dvh] overflow-x-hidden lg:overflow-y-hidden text-[#211b14]">
       <div className="bz-login-orb bz-login-orb-top" aria-hidden="true" />
       <div className="bz-login-orb bz-login-orb-bottom" aria-hidden="true" />
 
       <div className="relative z-10 mx-auto grid min-h-[100dvh] w-full max-w-[1600px] lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
         <section className="bz-login-story hidden min-h-[100dvh] flex-col justify-between border-r border-[#2f281f]/[0.08] px-10 py-10 lg:flex xl:px-16 xl:py-12 2xl:px-20">
           <div className="bz-login-reveal">
-            <BarberZapLogo label="BarberZap" showTagline tone="light" />
+            <BarberZapLogo label="BarberZap" tone="light" className="bz-login-brand" />
           </div>
 
           <div className="bz-login-reveal bz-login-reveal-delay my-12 max-w-[720px]">
@@ -94,10 +94,10 @@ const Login: React.FC = () => {
           </div>
         </section>
 
-        <section className="flex min-h-[100dvh] items-center justify-center px-4 py-6 sm:px-8 sm:py-10 lg:px-10 xl:px-14">
+        <section className="relative flex min-h-[100dvh] items-center justify-center px-4 py-6 sm:px-8 sm:py-10 lg:px-10 xl:px-14">
           <div className="bz-login-reveal bz-login-reveal-delay w-full max-w-[540px]">
             <div className="mb-6 px-1 lg:hidden">
-              <BarberZapLogo compact label="BarberZap" tone="light" />
+              <BarberZapLogo compact label="BarberZap" tone="light" className="bz-login-brand" />
               <p className="mt-3 max-w-[18rem] text-xs leading-5 text-[#756b5e]">
                 Gestão simples para uma rotina mais leve na sua barbearia.
               </p>
@@ -237,7 +237,7 @@ const Login: React.FC = () => {
               <p className="mt-3 text-center text-[10px] text-[#8c8174]">Sem compromisso. Cancele quando quiser.</p>
             </div>
 
-            <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-[#8c8174]">
+            <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-[#8c8174] lg:absolute lg:inset-x-0 lg:bottom-6 lg:mt-0">
               <span>© 2026 BarberZap</span>
               <span className="normal-case tracking-normal text-[#756b5e]">Feito para barbearias que querem crescer.</span>
               <span>Privacidade</span>

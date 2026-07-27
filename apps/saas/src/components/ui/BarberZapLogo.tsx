@@ -2,7 +2,6 @@ import React, { useId } from 'react';
 
 type BarberZapLogoProps = {
   compact?: boolean;
-  showTagline?: boolean;
   className?: string;
   label?: string;
   tone?: 'light' | 'dark';
@@ -10,7 +9,6 @@ type BarberZapLogoProps = {
 
 const BarberZapLogo: React.FC<BarberZapLogoProps> = ({
   compact = false,
-  showTagline = false,
   className = '',
   label,
   tone = 'dark',
@@ -20,7 +18,6 @@ const BarberZapLogo: React.FC<BarberZapLogoProps> = ({
   const maskId = `barberzap-cutout-${instanceId}`;
   const isDecorative = !label;
   const wordmarkColor = tone === 'light' ? 'text-[#1A1A1F]' : 'text-[#f3eee6]';
-  const taglineColor = tone === 'light' ? 'text-[#6B7280]' : 'text-[#8d8373]';
 
   return (
     <div
@@ -65,11 +62,6 @@ const BarberZapLogo: React.FC<BarberZapLogoProps> = ({
         >
           Barber<span className="text-[#b8841c]">Zap</span>
         </p>
-        {showTagline && (
-          <p className={`mt-2 text-[10px] font-bold uppercase tracking-[0.25em] ${taglineColor}`}>
-            Tecnologia que organiza, conecta e faz a barbearia crescer
-          </p>
-        )}
       </div>
     </div>
   );
