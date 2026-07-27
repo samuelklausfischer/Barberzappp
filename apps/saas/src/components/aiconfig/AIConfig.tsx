@@ -5,6 +5,24 @@ import { supabase } from '@/infrastructure/supabase/client';
 
 type Tone = 'formal' | 'amigavel' | 'descolado';
 type BusinessHour = { day: number; label: string; isOpen: boolean; open: string; close: string };
+
+type AddressFields = { city: string; neighborhood: string; street: string; number: string; complement: string };
+const EMPTY_ADDRESS: AddressFields = { city: '', neighborhood: '', street: '', number: '', complement: '' };
+const parseAddress = (value: string): AddressFields => {
+  const parts = value.split(',').map((part) => part.trim()).filter(Boolean);
+  return {
+    street: parts[0] || '',
+    number: parts[1] || '',
+    neighborhood: parts[2] || '',
+    city: parts[3] || '',
+    complement: parts.slice(4).join(', '),
+  };
+};
+const formatAddress = (value: AddressFields): string => {
+  const street = [value.street.trim(), value.number.trim()].filter(Boolean).join(', ');
+  const locality = [value.neighborhood.trim(), value.city.trim()].filter(Boolean).join(' - ');
+  return [street, locality, value.complement.trim()].filter(Boolean).join(', ');
+};
 type TenantConfig = { id: string; timezone: string | null; prompt_tone?: string | null; prompt_business_rules?: string | null; business_hours?: unknown; booking_interval_minutes?: number | null; whatsapp_status?: string | null };
 const DAYS = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
 const DEFAULT_HOURS: BusinessHour[] = DAYS.map((label, day) => ({ day, label, isOpen: day < 5, open: '09:00', close: '18:00' }));
@@ -29,7 +47,7 @@ const AIConfig: React.FC = () => {
   const config = tenant as TenantConfig | null;
   const [tone, setTone] = useState<Tone>('amigavel');
   const [assistantName, setAssistantName] = useState('');
-  const [address, setAddress] = useState('');
+  const [addressFields, setAddressFields] = useState<AddressFields>(EMPTY_ADDRESS);
   const [instructions, setInstructions] = useState('');
   const [hours, setHours] = useState(DEFAULT_HOURS.map((item) => ({ ...item })));
   const [interval, setInterval] = useState(30);
@@ -43,7 +61,7 @@ const AIConfig: React.FC = () => {
 
   useEffect(() => {
     if (!config || !profile) return;
-    setAssistantName(profile.ai_assistant_name || ''); setAddress(profile.business_address || '');
+    setAssistantName(profile.ai_assistant_name || ''); setAddressFields(parseAddress(profile.business_address || ''));
     setTone(TONES.some((item) => item.value === config.prompt_tone) ? (config.prompt_tone as Tone) : 'amigavel');
     setInstructions(config.prompt_business_rules || ''); setHours(normalizeHours(config.business_hours));
     setInterval(Math.min(120, Math.max(5, Number(config.booking_interval_minutes) || 30)));
@@ -72,18 +90,23 @@ const AIConfig: React.FC = () => {
     void load();
     return () => { cancelled = true; };
   }, [config]);
+  const address = useMemo(() => formatAddress(addressFields), [addressFields]);
   const checklist = useMemo(() => [
-    { label: 'Endereço da barbearia', done: Boolean(address.trim()), hint: 'A IA usa para confirmar a localização.', href: '/settings', icon: 'location_on' },
+    { label: 'Endereço da barbearia', done: Boolean(addressFields.city.trim() && addressFields.neighborhood.trim() && addressFields.street.trim() && addressFields.number.trim()), hint: 'A IA usa para confirmar a localização.', href: '/settings', icon: 'location_on' },
     { label: 'Serviços com preço e duração', done: serviceCount > 0 && completeServices === serviceCount, hint: serviceCount === 0 ? 'Cadastre pelo menos um serviço.' : `${completeServices} de ${serviceCount} prontos.`, href: '/services', icon: 'content_cut' },
     { label: 'Profissionais cadastrados', done: staffCount > 0, hint: staffCount > 0 ? `${staffCount} profissional(is) ativo(s).` : 'A IA precisa saber quem atende.', href: '/settings/team', icon: 'groups' },
     { label: 'Horário de funcionamento', done: hours.some((item) => item.isOpen), hint: 'Define quando a IA pode oferecer horários.', href: '#horarios', icon: 'schedule' },
     { label: 'WhatsApp conectado', done: whatsappConnected, hint: whatsappConnected ? 'A automação pode receber mensagens.' : 'Conecte o número para ativar o atendimento.', href: '/whatsapp', icon: 'chat' },
-  ], [address, completeServices, hours, serviceCount, staffCount, whatsappConnected]);
+  ], [address, addressFields, completeServices, hours, serviceCount, staffCount, whatsappConnected]);
   const updateHour = (day: number, update: Partial<BusinessHour>) => setHours((current) => current.map((item) => (item.day === day ? { ...item, ...update } : item)));
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!config || !user || saving) return;
+    if (!addressFields.city.trim() || !addressFields.neighborhood.trim() || !addressFields.street.trim() || !addressFields.number.trim()) {
+      setMessage({ kind: 'error', text: 'Preencha cidade, bairro, rua e número para a IA localizar a barbearia.' });
+      return;
+    }
     if (hours.some((item) => item.isOpen && item.open >= item.close)) {
       setMessage({ kind: 'error', text: 'Confira os horários: o fechamento deve ser depois da abertura.' });
       return;
@@ -104,15 +127,15 @@ const AIConfig: React.FC = () => {
       ? agentLookup.data.metadata as Record<string, unknown>
       : {};
     const [profileResult, tenantResult, agentResult] = await Promise.all([
-      supabase.from('profiles').update({ ai_assistant_name: assistantName.trim() || null, business_address: address.trim() || null }).eq('id', user.id),
+      supabase.from('profiles').update({ ai_assistant_name: assistantName.trim() || null, business_address: address || null }).eq('id', user.id),
       supabase.from('tenants').update({ prompt_tone: tone, prompt_business_rules: instructions.trim() || null, business_hours: hours, booking_interval_minutes: interval }).eq('id', config.id),
       supabase.from('agente_config').update({
         nome_ia: assistantName.trim() || 'Assistente',
         ai_name: assistantName.trim() || 'Assistente',
         nome_barbearia: profile.barbershop_name || null,
         name: profile.barbershop_name || null,
-        endereco: address.trim() || null,
-        address: address.trim() || null,
+        endereco: address || null,
+        address: address || null,
         horarios: hoursText,
         horario_funcionamento: hoursText,
         hours: hoursText,
@@ -130,7 +153,7 @@ const AIConfig: React.FC = () => {
   };
   const reset = () => {
     if (!config || !profile) return;
-    setAssistantName(profile.ai_assistant_name || ''); setAddress(profile.business_address || '');
+    setAssistantName(profile.ai_assistant_name || ''); setAddressFields(parseAddress(profile.business_address || ''));
     setTone(TONES.some((item) => item.value === config.prompt_tone) ? (config.prompt_tone as Tone) : 'amigavel');
     setInstructions(config.prompt_business_rules || ''); setHours(normalizeHours(config.business_hours));
     setInterval(Math.min(120, Math.max(5, Number(config.booking_interval_minutes) || 30))); setMessage(null);
@@ -148,7 +171,13 @@ const AIConfig: React.FC = () => {
         <div className="space-y-6">
           <section className="rounded-3xl border border-[#E8E5DD] bg-white p-5 shadow-[0_12px_30px_rgba(26,26,31,0.04)] sm:p-7">
             <div className="mb-6 flex items-start gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFF8E7] text-[#9A7417]"><span className="material-symbols-outlined">smart_toy</span></div><div><h2 className="text-lg font-bold text-[#1A1A1F]">Identidade da assistente</h2><p className="mt-1 text-sm leading-6 text-[#6B7280]">Um nome claro ajuda o cliente a entender com quem está falando.</p></div></div>
-            <div className="grid gap-5 sm:grid-cols-2"><label className="block"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Nome da IA</span><input value={assistantName} onChange={(event) => setAssistantName(event.target.value.slice(0, 50))} maxLength={50} placeholder="Ex.: Bia do BarberZap" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /><span className="mt-1.5 block text-xs text-[#9CA3AF]">Será usado na saudação do WhatsApp.</span></label><label className="block"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Endereço da barbearia</span><input value={address} onChange={(event) => setAddress(event.target.value.slice(0, 160))} maxLength={160} placeholder="Rua, número, bairro e cidade" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /><span className="mt-1.5 block text-xs text-[#9CA3AF]">A IA informa a localização quando o cliente perguntar.</span></label></div>
+            <div className="grid gap-5 sm:grid-cols-2"><label className="block"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Nome da IA</span><input value={assistantName} onChange={(event) => setAssistantName(event.target.value.slice(0, 50))} maxLength={50} placeholder="Ex.: Bia do BarberZap" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /><span className="mt-1.5 block text-xs text-[#9CA3AF]">Será usado na saudação do WhatsApp.</span></label><div className="sm:col-span-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+  <label className="block lg:col-span-2"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Rua</span><input value={addressFields.street} onChange={(event) => setAddressFields((current) => ({ ...current, street: event.target.value.slice(0, 100) }))} maxLength={100} placeholder="Nome da rua" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /></label>
+  <label className="block"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Número</span><input value={addressFields.number} onChange={(event) => setAddressFields((current) => ({ ...current, number: event.target.value.slice(0, 12) }))} maxLength={12} placeholder="123" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /></label>
+  <label className="block"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Bairro</span><input value={addressFields.neighborhood} onChange={(event) => setAddressFields((current) => ({ ...current, neighborhood: event.target.value.slice(0, 80) }))} maxLength={80} placeholder="Centro" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /></label>
+  <label className="block"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Cidade</span><input value={addressFields.city} onChange={(event) => setAddressFields((current) => ({ ...current, city: event.target.value.slice(0, 80) }))} maxLength={80} placeholder="São Paulo" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /></label>
+  <label className="block sm:col-span-2 lg:col-span-5"><span className="mb-2 block text-sm font-bold text-[#1A1A1F]">Complemento <span className="font-normal text-[#9CA3AF]">(opcional)</span></span><input value={addressFields.complement} onChange={(event) => setAddressFields((current) => ({ ...current, complement: event.target.value.slice(0, 100) }))} maxLength={100} placeholder="Sala, loja ou ponto de referência" className="min-h-12 w-full rounded-xl border border-[#D8D4CA] px-4 text-sm text-[#1A1A1F] outline-none transition focus:border-[#C29B2E] focus:ring-4 focus:ring-[#D4AF37]/15" /><span className="mt-1.5 block text-xs text-[#9CA3AF]">A IA usa esses dados para confirmar a localização com precisão.</span></label>
+</div></div>
           </section>
           <section className="rounded-3xl border border-[#E8E5DD] bg-white p-5 shadow-[0_12px_30px_rgba(26,26,31,0.04)] sm:p-7">
             <div className="mb-6 flex items-start gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFF8E7] text-[#9A7417]"><span className="material-symbols-outlined">record_voice_over</span></div><div><h2 className="text-lg font-bold text-[#1A1A1F]">Personalidade da conversa</h2><p className="mt-1 text-sm leading-6 text-[#6B7280]">Escolha um estilo. A IA mantém os limites de agenda e negócio em qualquer opção.</p></div></div>

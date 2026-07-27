@@ -56,11 +56,11 @@ const AppLayout: React.FC = () => {
   const timeZone = resolveAgendaTimeZone(tenant.timezone);
 
   return (
-    <div className="bz-app-bg flex h-[100dvh] overflow-hidden md:h-auto md:min-h-screen">
+    <div className="bz-app-bg flex h-[100dvh] min-h-0 overflow-hidden">
       <Sidebar role={membership.role} onLogout={handleLogout} />
       <MobileBottomNav role={membership.role} onLogout={handleLogout} />
 
-      <main className="h-[100dvh] min-w-0 flex-1 overflow-y-auto overscroll-y-contain scrollbar-hide md:h-auto md:min-h-screen">
+      <main className="h-[100dvh] min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain scrollbar-hide">
         <header className="sticky top-0 z-20 border-b border-[#E5E7EB]/90 bg-white/90 px-4 py-3 backdrop-blur-xl sm:px-5 lg:px-7">
           <div className="flex min-h-11 items-center justify-between gap-3">
             <button
