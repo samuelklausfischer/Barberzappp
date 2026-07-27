@@ -61,7 +61,7 @@ const Login: React.FC = () => {
           </div>
 
           <div className="bz-login-reveal bz-login-reveal-delay my-12 max-w-[720px]">
-            <p className="bz-kicker mb-5 text-[#956a16]">Seu negócio, mais simples</p>
+            <p className="bz-kicker mb-5 text-[#956a16]">BarberZap para barbearias em movimento</p>
             <h1 className="bz-title-serif max-w-[680px] text-[clamp(3.7rem,6vw,7.2rem)] font-semibold leading-[0.86] tracking-[-0.045em] text-[#1b1712]">
               Sua barbearia no ritmo certo.
             </h1>
@@ -86,7 +86,7 @@ const Login: React.FC = () => {
           </div>
 
           <div className="bz-login-reveal bz-login-reveal-delay-2 flex items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#756a5d]">
-            <span>BarberZap Atelier</span>
+            <span>Faça parte do BarberZap</span>
             <span className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#c49328] shadow-[0_0_12px_rgba(196,147,40,0.45)]" />
               Ambiente seguro
@@ -98,6 +98,9 @@ const Login: React.FC = () => {
           <div className="bz-login-reveal bz-login-reveal-delay w-full max-w-[540px]">
             <div className="mb-6 px-1 lg:hidden">
               <BarberZapLogo compact label="BarberZap" tone="light" />
+              <p className="mt-3 max-w-[18rem] text-xs leading-5 text-[#756b5e]">
+                Gestão simples para uma rotina mais leve na sua barbearia.
+              </p>
             </div>
 
             <div className="bz-login-card rounded-[28px] border border-[#9f7a2c]/[0.18] px-5 py-6 sm:rounded-[32px] sm:px-8 sm:py-8 xl:px-10 xl:py-9">
@@ -214,45 +217,29 @@ const Login: React.FC = () => {
                   {loading && <span className="bz-login-spinner" aria-hidden="true" />}
                   {loading ? 'Entrando...' : 'Entrar no BarberZap'}
                 </button>
-
-                <div className="flex items-center gap-3 pt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-[#8a7c6b] before:h-px before:flex-1 before:bg-black/[0.09] after:h-px after:flex-1 after:bg-black/[0.09]">
-                  Acessos futuros
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {['Apple', 'Google'].map((provider) => (
-                    <button
-                      key={provider}
-                      type="button"
-                      disabled
-                      className="flex min-h-12 cursor-not-allowed items-center justify-center gap-2 rounded-2xl border border-[#2f281f]/[0.1] bg-white/60 px-3 text-xs font-semibold text-[#85786a]"
-                    >
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-black/[0.1] text-[10px] font-bold">
-                        {provider.charAt(0)}
-                      </span>
-                      {provider}
-                      <span className="hidden text-[8px] uppercase tracking-[0.12em] text-[#92836f] sm:inline">Em breve</span>
-                    </button>
-                  ))}
-                </div>
               </form>
 
-              <div className="mt-6 border-t border-black/[0.08] pt-5 text-center">
-                <p className="text-xs text-[#7f7365]">
-                  Ainda não é parceiro?{' '}
-                  <button
-                    type="button"
-                    onClick={() => navigate('/cadastro')}
-                    className="font-bold text-[#956a16] transition-colors hover:text-[#6f4d0b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8861d]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f2e9]"
-                  >
-                    Crie sua conta de teste
-                  </button>
-                </p>
+              <div className="mt-7 rounded-[22px] border border-[#b8861d]/25 bg-[#fffaf0] p-4 shadow-[0_12px_30px_rgba(151,112,7,0.08)] sm:flex sm:items-center sm:justify-between sm:gap-5 sm:p-5">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-[#2a231b]">Ainda não faz parte do BarberZap?</p>
+                  <p className="mt-1 text-xs leading-5 text-[#756b5e]">
+                    Teste o painel por 7 dias e descubra uma rotina mais simples.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/cadastro')}
+                  className="mt-4 flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#b8861d]/35 bg-[#f3d98a]/35 px-4 text-[10px] font-bold uppercase tracking-[0.13em] text-[#76530a] transition-colors hover:bg-[#f3d98a]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8861d]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf0] sm:mt-0 sm:w-auto"
+                >
+                  Começar teste grátis
+                </button>
               </div>
+              <p className="mt-3 text-center text-[10px] text-[#8c8174]">Sem compromisso. Cancele quando quiser.</p>
             </div>
 
-            <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[9px] font-bold uppercase tracking-[0.18em] text-[#8c8174]">
+            <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-[#8c8174]">
               <span>© 2026 BarberZap</span>
+              <span className="normal-case tracking-normal text-[#756b5e]">Feito para barbearias que querem crescer.</span>
               <span>Privacidade</span>
               <span>Suporte</span>
             </footer>
