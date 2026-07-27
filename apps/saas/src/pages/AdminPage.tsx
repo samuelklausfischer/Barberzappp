@@ -70,6 +70,13 @@ const emptyDraft: SupportDraft = {
   instructions: '',
 };
 
+const DEMO_CAMPAIGNS: AdminCampaign[] = [
+  { id: 'demo-001', barberShopName: 'Barbearia Central', city: 'São Paulo', status: 'sent', dispatchedAt: '2026-07-26T14:30:00.000Z' },
+  { id: 'demo-002', barberShopName: 'Navalha & Estilo', city: 'Campinas', status: 'replied', dispatchedAt: '2026-07-26T11:15:00.000Z' },
+  { id: 'demo-003', barberShopName: 'Corte Nobre', city: 'Curitiba', status: 'interested', dispatchedAt: '2026-07-25T16:45:00.000Z' },
+  { id: 'demo-004', barberShopName: 'Barba Urbana', city: 'Santos', status: 'failed', dispatchedAt: '2026-07-25T09:20:00.000Z' },
+  { id: 'demo-005', barberShopName: 'Clube da Barba', city: 'Belo Horizonte', status: 'pending', dispatchedAt: null },
+];
 const navItems: Array<{ id: AdminPageId; label: string; icon: string; description: string }> = [
   { id: 'users', label: 'Usuários', icon: 'group', description: 'Contas e suporte' },
   { id: 'campaigns', label: 'Barbearias disparadas', icon: 'send', description: 'Status dos contatos' },
@@ -92,13 +99,14 @@ const campaignStatusClass: Record<AdminCampaign['status'], string> = {
   interested: 'bg-[#ECFDF3] text-[#15803D]',
 };
 
-const CampaignsPage: React.FC<{ campaigns: AdminCampaign[] }> = ({ campaigns }) => (
+const CampaignsPage: React.FC<{ campaigns: AdminCampaign[]; isDemo: boolean }> = ({ campaigns, isDemo }) => (
   <section className="space-y-6">
     <header className="rounded-3xl border border-[#E8D9AE] bg-[linear-gradient(120deg,#FFF8E7,#FFFFFF)] px-6 py-7 shadow-[0_16px_44px_rgba(137,100,23,0.08)]">
       <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9A7417]">Prospecção organizada</p>
       <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">Barbearias disparadas</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B7280]">Veja o histórico de contatos e em que ponto cada barbearia está no relacionamento.</p>
     </header>
+    {isDemo && <div className="rounded-2xl border border-[#E8D9AE] bg-[#FFF8E7] px-5 py-4 text-sm text-[#786B50]" role="status"><strong>Dados de demonstração.</strong> Estes registros são exemplos visuais e não foram enviados nem salvos no Supabase.</div>}
     <div className="overflow-hidden rounded-2xl border border-[#E8E5DD] bg-white shadow-[0_8px_24px_rgba(26,26,31,0.04)]">
       <div className="border-b border-[#F0EEE8] px-6 py-5"><h2 className="text-lg font-extrabold">Histórico de disparos</h2><p className="mt-1 text-sm text-[#6B7280]">{campaigns.length} registros encontrados</p></div>
       {campaigns.length === 0 ? <div className="px-6 py-16 text-center text-sm text-[#6B7280]">Nenhuma barbearia disparada ainda.</div> : <div className="divide-y divide-[#F5F3EE]">{campaigns.map((campaign) => <div key={campaign.id} className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold">{campaign.barberShopName}</p><p className="mt-1 text-xs text-[#6B7280]">{campaign.city} · {campaign.dispatchedAt ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date(campaign.dispatchedAt)) : 'Ainda não disparado'}</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] ${campaignStatusClass[campaign.status]}`}>{campaignStatusLabel[campaign.status]}</span></div>)}</div>}
@@ -106,7 +114,7 @@ const CampaignsPage: React.FC<{ campaigns: AdminCampaign[] }> = ({ campaigns }) 
   </section>
 );
 
-const FinderPage: React.FC<{ campaigns: AdminCampaign[] }> = ({ campaigns }) => {
+const FinderPage: React.FC<{ campaigns: AdminCampaign[]; isDemo: boolean }> = ({ campaigns, isDemo }) => {
   const [city, setCity] = useState('');
   const [searched, setSearched] = useState(false);
   const results = searched && city.trim() ? campaigns.filter((campaign) => campaign.city.toLowerCase().includes(city.trim().toLowerCase())) : [];
@@ -118,6 +126,7 @@ const FinderPage: React.FC<{ campaigns: AdminCampaign[] }> = ({ campaigns }) => 
         <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">Buscador de barbearias</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B7280]">Defina uma cidade para preparar uma nova frente de prospecção. A busca externa ficará protegida até o provedor ser configurado.</p>
       </header>
+      {isDemo && <div className="rounded-2xl border border-[#E8D9AE] bg-[#FFF8E7] px-5 py-4 text-sm text-[#786B50]" role="status"><strong>Dados de demonstração.</strong> O buscador está usando os mesmos exemplos apenas para você testar os filtros.</div>}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.65fr)]">
         <form onSubmit={(event) => { event.preventDefault(); setSearched(true); }} className="rounded-2xl border border-[#E8E5DD] bg-white p-6 shadow-[0_8px_24px_rgba(26,26,31,0.04)]">
           <label htmlFor="admin-city" className="text-sm font-extrabold text-[#2A231B]">Cidade de interesse</label>
@@ -137,6 +146,7 @@ const AdminPage: React.FC = () => {
   const [activePage, setActivePage] = useState<AdminPageId>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [campaigns, setCampaigns] = useState<AdminCampaign[]>([]);
+  const [campaignsAreDemo, setCampaignsAreDemo] = useState(false);
   const [metrics, setMetrics] = useState<AdminMetrics>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -161,7 +171,9 @@ const AdminPage: React.FC = () => {
     }
     const payload = (data ?? {}) as JsonRecord;
     setUsers(Array.isArray(payload.users) ? payload.users.map((item) => mapUser(item as JsonRecord)) : []);
-    setCampaigns(Array.isArray(payload.campaigns) ? payload.campaigns.map((item) => mapCampaign(item as JsonRecord)) : []);
+    const mappedCampaigns = Array.isArray(payload.campaigns) ? payload.campaigns.map((item) => mapCampaign(item as JsonRecord)) : [];
+    setCampaigns(mappedCampaigns.length > 0 ? mappedCampaigns : DEMO_CAMPAIGNS);
+    setCampaignsAreDemo(mappedCampaigns.length === 0);
     setMetrics(mapMetrics(payload.metrics));
     setLoading(false);
   }, []);
@@ -250,8 +262,8 @@ const AdminPage: React.FC = () => {
         </aside>
         <main className="min-w-0 flex-1 px-4 py-5 pb-24 sm:px-6 lg:px-8 lg:py-8">
           {activePage === 'users' && <AdminDashboard users={users} campaigns={[]} metrics={metrics} loading={loading} error={error} onRetry={() => void load()} onSelectUser={(user) => void openDetails(user)} activeSection="users" hideNavigation />}
-          {activePage === 'campaigns' && <CampaignsPage campaigns={campaigns} />}
-          {activePage === 'finder' && <FinderPage campaigns={campaigns} />}
+          {activePage === 'campaigns' && <CampaignsPage campaigns={campaigns} isDemo={campaignsAreDemo} />}
+          {activePage === 'finder' && <FinderPage campaigns={campaigns} isDemo={campaignsAreDemo} />}
         </main>
       </div>
 
