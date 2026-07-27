@@ -181,6 +181,7 @@ export type Database = {
           trial_started_at: string | null;
           trial_ends_at: string | null;
           timezone: string | null;
+          booking_interval_minutes: number;
         };
         Insert: {
           id?: string;
@@ -199,6 +200,7 @@ export type Database = {
           trial_started_at?: string | null;
           trial_ends_at?: string | null;
           timezone?: string | null;
+          booking_interval_minutes?: number;
         };
         Update: {
           id?: string;
@@ -217,6 +219,90 @@ export type Database = {
           trial_started_at?: string | null;
           trial_ends_at?: string | null;
           timezone?: string | null;
+          booking_interval_minutes?: number;
+        };
+      };
+      agente_config: {
+        Row: {
+          id: number;
+          tenant_id: string;
+          shop_id: string;
+          user_id: string;
+          barber_name: string;
+          nome_barbearia: string | null;
+          name: string | null;
+          endereco: string | null;
+          address: string | null;
+          horarios: string | null;
+          horario_funcionamento: string | null;
+          hours: string | null;
+          nome_ia: string;
+          ai_name: string | null;
+          saudacao: string | null;
+          greeting: string | null;
+          instructions: string | null;
+          phone: string | null;
+          whatsapp: string | null;
+          email: string | null;
+          status: string;
+          ai_enabled: boolean;
+          language: string | null;
+          timezone: string | null;
+          model: string | null;
+          temperature: number | null;
+          metadata: unknown;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: number;
+          tenant_id: string;
+          shop_id: string;
+          user_id: string;
+          barber_name: string;
+          nome_ia: string;
+          nome_barbearia?: string | null;
+          name?: string | null;
+          endereco?: string | null;
+          address?: string | null;
+          horarios?: string | null;
+          horario_funcionamento?: string | null;
+          hours?: string | null;
+          ai_name?: string | null;
+          saudacao?: string | null;
+          greeting?: string | null;
+          instructions?: string | null;
+          phone?: string | null;
+          whatsapp?: string | null;
+          email?: string | null;
+          status?: string;
+          ai_enabled?: boolean;
+          language?: string | null;
+          timezone?: string | null;
+          model?: string | null;
+          temperature?: number | null;
+          metadata?: unknown;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          nome_ia?: string;
+          nome_barbearia?: string | null;
+          name?: string | null;
+          endereco?: string | null;
+          address?: string | null;
+          horarios?: string | null;
+          horario_funcionamento?: string | null;
+          hours?: string | null;
+          ai_name?: string | null;
+          saudacao?: string | null;
+          greeting?: string | null;
+          instructions?: string | null;
+          phone?: string | null;
+          whatsapp?: string | null;
+          email?: string | null;
+          metadata?: unknown;
+          updated_at?: string | null;
         };
       };
       profiles: {

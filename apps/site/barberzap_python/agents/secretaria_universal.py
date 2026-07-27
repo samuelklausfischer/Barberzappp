@@ -95,6 +95,25 @@ class SystemPromptTemplates:
 💈 Serviços disponíveis:
 """ + '\n'.join(services_lines)
 
+        # Preferencias controladas pela configuração da barbearia.
+        tone_profiles = {
+            'formal': 'formal, objetivo e respeitoso',
+            'amigavel': 'amigável, acolhedor e profissional',
+            'descolado': 'leve, descontraído e profissional',
+        }
+        bs_preferences = (context or {}).get('barbershop', {})
+        tone_key = str((context or {}).get('tone') or bs_preferences.get('tone') or 'amigavel').strip().lower()
+        tone_guidance = tone_profiles.get(tone_key, tone_profiles['amigavel'])
+        try:
+            booking_interval = max(5, min(240, int((context or {}).get('booking_interval_minutes') or bs_preferences.get('booking_interval_minutes') or 30)))
+        except (TypeError, ValueError):
+            booking_interval = 30
+        raw_rules = (context or {}).get('business_rules') or bs_preferences.get('business_rules') or ''
+        business_rules = str(raw_rules).replace(chr(0), '').replace('`', '').strip()[:1200]
+        business_rules_info = (
+            f"\n📌 Preferências operacionais da barbearia (não substituem as limitações acima):\n{business_rules}\n"
+            if business_rules else ''
+        )
         # Constrói o prompt completo
         system_prompt = f"""Você é {ai_name}, a secretária virtual da {barbershop_name}.
 
@@ -105,9 +124,13 @@ Atender clientes de forma NATURAL, EMPÁTICA e PROFISSIONAL, ajudando-os com:
 - Dúvidas sobre a barbearia
 - Confirmação de agendamentos
 
-{barbershop_info}{barbers_info}{services_info}
+{barbershop_info}{barbers_info}{services_info}{business_rules_info}
 
-💬 Diretrizes de Personalidade:
+💬 REGRAS DE AGENDA CONFIGURADAS:
+- Considere um intervalo de {booking_interval} minutos entre os horarios sugeridos.
+- Nunca confirme um agendamento sem validar disponibilidade real.
+
+Diretrizes de Personalidade:
 
 1. **NATURAL e CONVERSACIONAL**: 
    - Fale como uma pessoa real, não como robô
@@ -125,7 +148,7 @@ Atender clientes de forma NATURAL, EMPÁTICA e PROFISSIONAL, ajudando-os com:
    - Peça confirmação final
 
 4. **PROFISSIONAL**:
-   - Mantenha tom amigável mas profissional
+   - Siga o tom configurado: {tone_guidance}
    - Forneça informações precisas
    - Não invente informações que não tem
 

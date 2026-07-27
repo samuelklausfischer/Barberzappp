@@ -12,6 +12,7 @@ Consulta:
 Retorna dict estruturado pronto para uso pelos agentes.
 """
 
+import json
 import logging
 from typing import Dict, List, Any, Optional
 
@@ -21,6 +22,84 @@ logger = logging.getLogger(__name__)
 
 # Importação do cliente Supabase
 from integrations.supabase_rest import SupabaseRestClient, get_client
+# Preferencias aceitas pela interface. Mantemos a lista fechada para que um
+# valor vindo do banco nunca consiga alterar as instrucoes de seguranca do
+# agente por meio do campo de tom.
+_TONE_ALIASES = {
+    'formal': 'formal',
+    'profissional': 'formal',
+    'professional': 'formal',
+    'amigavel': 'amigavel',
+    'amigável': 'amigavel',
+    'friendly': 'amigavel',
+    'descolado': 'descolado',
+    'casual': 'descolado',
+}
+_DEFAULT_TONE = 'amigavel'
+_DEFAULT_BOOKING_INTERVAL_MINUTES = 30
+
+
+def _metadata(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Le metadata tanto como objeto JSON quanto como string JSON."""
+    value = config.get('metadata')
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, dict) else {}
+        except (TypeError, ValueError):
+            return {}
+    return {}
+
+
+def _normalize_tone(value: Any) -> str:
+    """Converte aliases legados no conjunto fechado de tons da IA."""
+    key = str(value or '').strip().lower()
+    return _TONE_ALIASES.get(key, _DEFAULT_TONE)
+
+
+def _normalize_business_rules(value: Any) -> str:
+    """Limita preferencias editaveis e remove marcadores de prompt."""
+    if not isinstance(value, str):
+        return ''
+    # Regras sao uma preferencia operacional, nunca um novo system prompt.
+    return value.replace(chr(0), '').replace('```', '').strip()[:1200]
+
+
+def _normalize_booking_interval(value: Any) -> int:
+    """Retorna intervalo seguro em minutos, limitado a 5-240."""
+    try:
+        interval = int(value)
+    except (TypeError, ValueError):
+        return _DEFAULT_BOOKING_INTERVAL_MINUTES
+    return max(5, min(240, interval))
+
+
+def _extract_ai_preferences(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Extrai preferencias novas sem quebrar registros de versoes antigas."""
+    metadata = _metadata(config)
+    tone = (
+        config.get('prompt_tone')
+        or config.get('tone')
+        or metadata.get('prompt_tone')
+        or metadata.get('tone')
+    )
+    rules = (
+        config.get('prompt_business_rules')
+        or config.get('business_rules')
+        or metadata.get('prompt_business_rules')
+        or metadata.get('business_rules')
+    )
+    interval = (
+        config.get('booking_interval_minutes')
+        or metadata.get('booking_interval_minutes')
+    )
+    return {
+        'tone': _normalize_tone(tone),
+        'business_rules': _normalize_business_rules(rules),
+        'booking_interval_minutes': _normalize_booking_interval(interval),
+    }
 
 
 def build_context(
@@ -107,6 +186,7 @@ def build_context(
 
         # Extrai dados da barbearia com valores padrão
         # Mapeia campos do banco para o padrão interno
+        ai_preferences = _extract_ai_preferences(agente_config)
         barbershop = {
             'user_id': user_id,
             'name': (
@@ -133,7 +213,10 @@ def build_context(
             ),
             'greeting': agente_config.get('saudacao') or '',
             'phone': agente_config.get('phone') or '',
-            'whatsapp': agente_config.get('whatsapp') or ''
+            'whatsapp': agente_config.get('whatsapp') or '',
+            'tone': ai_preferences['tone'],
+            'business_rules': ai_preferences['business_rules'],
+            'booking_interval_minutes': ai_preferences['booking_interval_minutes']
         }
 
         logger.debug(f"Barbershop config: {barbershop['name']}")
@@ -191,7 +274,12 @@ def build_context(
         context = {
             'barbershop': barbershop,
             'barbers': barbers_list,
-            'services': services_list
+            'services': services_list,
+            # Atalhos para consumidores que nao precisam conhecer o schema interno.
+            'tone': ai_preferences['tone'],
+            'business_rules': ai_preferences['business_rules'],
+            'booking_interval_minutes': ai_preferences['booking_interval_minutes'],
+            'preferences': ai_preferences
         }
 
         logger.info(f"Context built successfully for {barbershop['name']}")
@@ -393,6 +481,8 @@ def get_barbershop_config(
         if not config:
             return None
 
+        ai_preferences = _extract_ai_preferences(config)
+
         return {
             'user_id': user_id,
             'name': (
@@ -419,7 +509,10 @@ def get_barbershop_config(
             ),
             'greeting': config.get('saudacao') or '',
             'phone': config.get('phone') or '',
-            'whatsapp': config.get('whatsapp') or ''
+            'whatsapp': config.get('whatsapp') or '',
+            'tone': ai_preferences['tone'],
+            'business_rules': ai_preferences['business_rules'],
+            'booking_interval_minutes': ai_preferences['booking_interval_minutes']
         }
 
     except Exception as e:
