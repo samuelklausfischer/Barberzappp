@@ -1,4 +1,4 @@
-﻿export type AppRole = 'owner' | 'employee';
+export type AppRole = 'owner' | 'employee';
 export type NavigationSection = 'operation' | 'management';
 
 export interface NavigationRoute {
@@ -45,6 +45,7 @@ export const APP_PATHS = {
   SETTINGS: APP_ROUTES.settings.path,
   LOGIN: '/login',
   REGISTRATION: '/cadastro',
+  ADMIN: '/admin',
 } as const;
 
 export const NAVIGATION_ITEMS: readonly NavigationRoute[] = Object.values(APP_ROUTES).sort((a, b) => {

@@ -5,7 +5,9 @@ interface User {
   id: string;
   email: string;
   created_at: string;
+  app_metadata?: Record<string, unknown>;
 }
+
 interface Profile {
   id: string;
   barbershop_name: string | null;
@@ -17,6 +19,7 @@ interface Profile {
   business_hours: string | null;
   subscription_status: string | null;
 }
+
 interface Tenant {
   id: string;
   company_name: string | null;
@@ -28,6 +31,7 @@ interface Tenant {
   trial_ends_at: string | null;
   timezone: string | null;
 }
+
 interface TenantMembership {
   id: string;
   user_id: string;
@@ -38,7 +42,9 @@ interface TenantMembership {
   updated_at: string;
   tenants: Tenant;
 }
+
 type AccessState = 'active' | 'trialing' | 'paused';
+
 interface AuthState {
   user: User | null;
   session: any;
@@ -49,7 +55,9 @@ interface AuthState {
   error: string | null;
   accessState: AccessState;
   trialEndsAt: string | null;
+  isAdmin: boolean;
 }
+
 interface AuthActions {
   signIn: (
     email: string,
@@ -57,15 +65,19 @@ interface AuthActions {
   ) => Promise<{
     user: User;
     session: any;
-    profile: Profile;
-    membership: TenantMembership;
-    tenant: Tenant;
+    profile: Profile | null;
+    membership: TenantMembership | null;
+    tenant: Tenant | null;
   }>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
+
 type AuthContextValue = AuthState & AuthActions;
 const AuthContext = React.createContext<AuthContextValue | null>(null);
+
+const isAdminUser = (candidate: User | null | undefined): boolean =>
+  candidate?.app_metadata?.role === 'admin';
 
 const accessFor = (tenant: Tenant | null): AccessState => {
   if (!tenant || !tenant.is_active) return 'paused';
@@ -85,6 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const clear = useCallback(() => {
     setUser(null);
     setSession(null);
@@ -92,10 +105,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMembership(null);
     setTenant(null);
   }, []);
+
   const loadContext = useCallback(async (currentSession: any) => {
     const { error: refreshError } = await supabase.rpc('refresh_my_trial_state');
     if (refreshError)
       throw new Error('Não foi possível atualizar o estado da assinatura. Tente entrar novamente.');
+
     const [profileResult, membershipResult] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', currentSession.user.id).single(),
       supabase
@@ -107,17 +122,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('status', 'active')
         .single(),
     ]);
+
     if (profileResult.error) throw new Error('Não foi possível carregar o perfil desta conta.');
     if (membershipResult.error || !membershipResult.data)
       throw new Error('Esta conta não possui um acesso ativo à barbearia.');
+
     const loadedTenant = membershipResult.data.tenants as unknown as Tenant;
     if (!loadedTenant) throw new Error('Não foi possível carregar os dados da barbearia.');
+
     return {
       profile: profileResult.data as Profile,
       membership: membershipResult.data as unknown as TenantMembership,
       tenant: loadedTenant,
     };
   }, []);
+
+  const setAdminContext = useCallback((currentSession: any) => {
+    setUser(currentSession.user as User);
+    setSession(currentSession);
+    setProfile(null);
+    setMembership(null);
+    setTenant(null);
+  }, []);
+
   const checkSession = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -126,13 +153,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data: { session: currentSession },
         error: sessionError,
       } = await supabase.auth.getSession();
+
       if (sessionError) throw sessionError;
       if (!currentSession) {
         clear();
         return;
       }
+
+      if (isAdminUser(currentSession.user as User)) {
+        setAdminContext(currentSession);
+        return;
+      }
+
       const context = await loadContext(currentSession);
-      setUser(currentSession.user);
+      setUser(currentSession.user as User);
       setSession(currentSession);
       setProfile(context.profile);
       setMembership(context.membership);
@@ -143,7 +177,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [clear, loadContext]);
+  }, [clear, loadContext, setAdminContext]);
+
   useEffect(() => {
     void checkSession();
     const { data } = supabase.auth.onAuthStateChange((event) => {
@@ -152,6 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     return () => data.subscription.unsubscribe();
   }, [checkSession]);
+
   const signIn = useCallback(
     async (email: string, password: string) => {
       setLoading(true);
@@ -161,15 +197,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email,
           password,
         });
+
         if (signInError || !data.session || !data.user)
           throw new Error(signInError?.message || 'Não foi possível iniciar a sessão.');
+
+        if (isAdminUser(data.user as User)) {
+          setAdminContext(data.session);
+          return {
+            user: data.user as User,
+            session: data.session,
+            profile: null,
+            membership: null,
+            tenant: null,
+          };
+        }
+
         const context = await loadContext(data.session);
-        setUser(data.user);
+        setUser(data.user as User);
         setSession(data.session);
         setProfile(context.profile);
         setMembership(context.membership);
         setTenant(context.tenant);
-        return { user: data.user, session: data.session, ...context };
+        return { user: data.user as User, session: data.session, ...context };
       } catch (cause) {
         clear();
         const message = cause instanceof Error ? cause.message : 'Erro ao fazer login.';
@@ -179,8 +228,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
       }
     },
-    [clear, loadContext]
+    [clear, loadContext, setAdminContext]
   );
+
   const signOut = useCallback(async () => {
     setLoading(true);
     try {
@@ -191,8 +241,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   }, [clear]);
-  const accessState = accessFor(tenant);
+
+  const isAdmin = isAdminUser(user);
+  const accessState = isAdmin ? 'active' : accessFor(tenant);
   const trialEndsAt = tenant?.trial_ends_at ?? null;
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -204,6 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       error,
       accessState,
       trialEndsAt,
+      isAdmin,
       signIn,
       signOut,
       refreshSession: checkSession,
@@ -218,13 +272,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       error,
       accessState,
       trialEndsAt,
+      isAdmin,
       signIn,
       signOut,
       checkSession,
     ]
   );
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
 export const useAuth = (): AuthContextValue => {
   const context = React.useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within AuthProvider');

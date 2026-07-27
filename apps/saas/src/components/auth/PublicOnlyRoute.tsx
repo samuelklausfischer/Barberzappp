@@ -9,7 +9,7 @@ interface PublicOnlyRouteProps {
 }
 
 const PublicOnlyRoute = ({ children }: PublicOnlyRouteProps) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -19,7 +19,8 @@ const PublicOnlyRoute = ({ children }: PublicOnlyRouteProps) => {
     );
   }
 
-  return user ? <Navigate to={APP_PATHS.DASHBOARD} replace /> : <>{children}</>;
+  if (!user) return <>{children}</>;
+  return <Navigate to={isAdmin ? APP_PATHS.ADMIN : APP_PATHS.DASHBOARD} replace />;
 };
 
 export default PublicOnlyRoute;

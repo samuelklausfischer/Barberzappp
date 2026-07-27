@@ -13,6 +13,8 @@ import { RoleGuard } from '@/components/auth/RoleGuard';
 import PublicOnlyRoute from '@/components/auth/PublicOnlyRoute';
 import GeneralSettings from '@/components/settings/GeneralSettings';
 import TeamSettings from '@/components/settings/TeamSettings';
+import AdminGuard from '@/components/auth/AdminGuard';
+import AdminPage from '@/pages/AdminPage';
 import { APP_PATHS } from '@/config/routes';
 
 export const router = createBrowserRouter([
@@ -89,6 +91,14 @@ export const router = createBrowserRouter([
         element: <ClientsList />,
       },
     ],
+  },
+  {
+    path: APP_PATHS.ADMIN,
+    element: (
+      <AdminGuard>
+        <AdminPage />
+      </AdminGuard>
+    ),
   },
   {
     path: '*',
