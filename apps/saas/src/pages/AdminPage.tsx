@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminDashboard, { AdminCampaign, AdminMetrics, AdminUser } from '@/components/admin/AdminDashboard';
 import { supabase } from '@/infrastructure/supabase/client';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 type JsonRecord = Record<string, unknown>;
 type AdminPageId = 'users' | 'campaigns' | 'finder';
@@ -130,6 +132,8 @@ const FinderPage: React.FC<{ campaigns: AdminCampaign[] }> = ({ campaigns }) => 
 };
 
 const AdminPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [activePage, setActivePage] = useState<AdminPageId>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [campaigns, setCampaigns] = useState<AdminCampaign[]>([]);
@@ -141,6 +145,7 @@ const AdminPage: React.FC = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [draft, setDraft] = useState<SupportDraft>(emptyDraft);
@@ -228,6 +233,20 @@ const AdminPage: React.FC = () => {
           <div className="mb-8 max-md:hidden"><p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#D4AF37]">BarberZap</p><h1 className="mt-2 text-xl font-extrabold">Central admin</h1><p className="mt-1 text-xs text-white/50">Controle interno protegido</p></div>
           <nav className="flex flex-1 flex-col gap-2 max-md:flex-row max-md:gap-1" aria-label="Navegação administrativa">{navItems.map((item) => <button key={item.id} type="button" onClick={() => setActivePage(item.id)} className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-left transition max-md:flex-1 max-md:justify-center max-md:px-2 ${activePage === item.id ? 'bg-[#D4AF37] text-[#171719]' : 'text-white/70 hover:bg-white/10 hover:text-white'}`} aria-current={activePage === item.id ? 'page' : undefined}><span className="material-symbols-outlined text-[21px]" aria-hidden="true">{item.icon}</span><span className="min-w-0 max-md:hidden"><span className="block text-sm font-extrabold">{item.label}</span><span className={`mt-0.5 block text-[10px] ${activePage === item.id ? 'text-[#171719]/65' : 'text-white/40'}`}>{item.description}</span></span><span className="sr-only md:hidden">{item.label}</span></button>)}</nav>
           <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white/50 max-md:hidden"><span className="material-symbols-outlined text-base text-[#D4AF37]" aria-hidden="true">shield_lock</span><p className="mt-2 leading-5">Alterações exigem confirmação e ficam registradas.</p></div>
+          <button type="button" onClick={async () => {
+            if (!window.confirm('Deseja realmente sair da conta admin?')) return;
+            setLoggingOut(true);
+            try {
+              await signOut();
+              navigate('/login', { replace: true });
+            } finally {
+              setLoggingOut(false);
+            }
+          }} disabled={loggingOut} className="mt-3 flex min-h-11 items-center gap-3 rounded-xl border border-white/10 px-3 py-3 text-left text-white/70 transition hover:border-[#D4AF37]/50 hover:bg-white/10 hover:text-white disabled:cursor-wait disabled:opacity-60 max-md:mt-0 max-md:ml-1 max-md:w-12 max-md:justify-center max-md:border-0 max-md:px-2" aria-label="Sair da conta admin">
+            <span className="material-symbols-outlined text-[21px]" aria-hidden="true">logout</span>
+            <span className="text-sm font-extrabold max-md:hidden">{loggingOut ? 'Saindo...' : 'Sair da conta'}</span>
+            <span className="sr-only md:hidden">Sair da conta</span>
+          </button>
         </aside>
         <main className="min-w-0 flex-1 px-4 py-5 pb-24 sm:px-6 lg:px-8 lg:py-8">
           {activePage === 'users' && <AdminDashboard users={users} campaigns={[]} metrics={metrics} loading={loading} error={error} onRetry={() => void load()} onSelectUser={(user) => void openDetails(user)} activeSection="users" hideNavigation />}
